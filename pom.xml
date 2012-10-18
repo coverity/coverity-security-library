@@ -6,7 +6,7 @@
     <groupId>com.coverity.security</groupId>
     <artifactId>coverity-security-library</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <name>coverity-security-library</name>
     <description>Open source security library from Coverity</description>
     <url>http://coverity.com/security</url>
@@ -18,8 +18,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/coverity/coverity-security-library</url>
-        <connection>scm:git:git://github.com/coverity/coverity-security-library.git</connection>
+        <connection>scm:git:git@github.com:coverity/coverity-security-library.git</connection>
+        <developerConnection>scm:git:git@github.com:coverity/coverity-security-library.git</developerConnection>
+        <url>git@github.com:coverity/coverity-security-library.git</url>
     </scm>
 
     <developers>
@@ -50,15 +51,28 @@
 
     <build>
         <plugins>
-                <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
