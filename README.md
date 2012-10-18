@@ -3,9 +3,9 @@
 
 ## Escape
 
-The [Escape library](https://github.com/coverity/coverity-security-library/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape sub directory](https://github.com/coverity/coverity-security-library/coverity-escapers).
+The [Escape library](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape sub directory](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers).
 
-Before using any of these methods, the user should understand the context (or nested contexts) in which the data is inserted. Some examples are available in the [repository](https://github.com/coverity/coverity-security-library/coverity-escapers/samples), and more will be available on [our blog](https://communities.coverity.com/blogs/security).
+Before using any of these methods, the user should understand the context (or nested contexts) in which the data is inserted. Some examples are available in the [repository](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers/samples), and more will be available on [our blog](https://communities.coverity.com/blogs/security).
 
 To include this library into your Maven project, add the following:
 
