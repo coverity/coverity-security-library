@@ -1,11 +1,13 @@
 # Coverity Security Library
 [Coverity](http://www.coverity.com) [Security Research Labs](https://communities.coverity.com/blogs/security) has developed open source (BSD style) Java libraries useful to remedy security defects. 
 
+The libraries can be used in Java programs as well as JSPs. The escapers are also available as EL (Expression Language) functions for an easier use in JSPs.
+
 ## Escape
 
-The [Escape library](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape sub directory](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers).
+The [Escape library](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape directory](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers).
 
-Before using any of these methods, the user should understand the context (or nested contexts) in which the data is inserted. Some examples are available in the [repository](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers/samples), and more will be available on [our blog](https://communities.coverity.com/blogs/security).
+Before using any of these methods, the user should understand the context (or nested contexts) in which the data is inserted. [Several examples](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers/samples) are available in the repository, and more will be available on [our blog](https://communities.coverity.com/blogs/security).
 
 To include this library into your Maven project, add the following:
 
@@ -14,6 +16,19 @@ To include this library into your Maven project, add the following:
         <artifactId>coverity-escapers/artifactId>
         <version>1.0.0</version>
     </dependency>
+
+Then you can use it directly in your JSPs:
+
+    <%@ taglib uri="http://coverity.com/security" prefix="cov" %>
+    <script>
+        var x = '${cov:jsStringEscape(param.tainted)}';
+    </script>
+
+or in your Java programs:
+
+    import com.coverity.security.Escape;
+    // ...
+    return "<div>" + Escape.html(request.getParameter("tainted")) + </div>;
 
 To contact the SRL, please email us at <srl@coverity.com>. Fork away, we look forward to your pull requests!
 

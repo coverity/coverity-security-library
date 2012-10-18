@@ -82,8 +82,8 @@ and then the `cov:jsStringEscape` EL method needs to wrap the `param.needHelp` a
 the injection point. The outer `fn:escapeXml` method should still be used to
 ensure values are properly escaped for the HTML attribute value context.
 
-    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
-    <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+    <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
     <%@ taglib prefix="cov" uri="http://coverity.com/security" %>
 
     <!DOCTYPE html>
