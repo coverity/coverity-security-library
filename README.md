@@ -1,13 +1,22 @@
 # Coverity Security Library
-[Coverity](http://www.coverity.com) [Security Research Labs](https://communities.coverity.com/blogs/security) has developed open source (BSD style) Java libraries useful to remedy security defects. 
+The Coverity Security Library (CSL) is a lightweight set of escaping routines for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.  CSL is small, simple, and easy to use.
 
-The libraries can be used in Java programs as well as JSPs. The escapers are also available as EL (Expression Language) functions for an easier use in JSPs.
+Here's why it's worth checking out:
+
+* **It's secure:** We take the security of CSL seriously. Every change is carefully scrutinized through a process that includes manual code review, static analysis, fuzz testing, and unit testing.
+
+* **It's convenient:** CSL contains escapers for XSS and SQL injection that are missing from standard libraries like Apache Commons and JEE.  We use fast, easy to invoke static methods with short, intuitive names.  We also provide hooks for Expression Language (EL) to make it easy to use within JSPs.
+
+* **It's free:** CSL is distributed under a BSD-style license.  We would appreciate patches be sent back to us but it's not required.
+
+Users of Coverity Security Advisor get remediation guidance based on escaping routines in CSL.  However, CSL is a standalone project with no dependencies on Security Advisor.
+
 
 ## Escape
 
-The [Escape library](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape directory](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers).
+The [Escape class](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape directory](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers).
 
-Before using any of these methods, the user should understand the context (or nested contexts) in which the data is inserted. [Several examples](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers/samples) are available in the repository, and more will be available on [our blog](https://communities.coverity.com/blogs/security).
+Before using any of these methods, you should understand the context (or nested contexts) in which the data is inserted. [Several examples](https://github.com/coverity/coverity-security-library/tree/master/coverity-escapers/samples) are available in the repository, and more will be available on [our blog](https://communities.coverity.com/blogs/security).
 
 To include this library into your Maven project, add the following:
 

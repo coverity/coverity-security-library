@@ -15,7 +15,7 @@ and understands their behavior; however, there is no dependency on
 Coverity products. This library is completely standalone. Feel free to
 use them! Just make sure you use them correctly :)
 
-### Table of Content
+### Table of Contents
 1. [Installation](#main_install)
 2. [Usage](#main_usage)
 3. [HTML Contexts Examples](#main_contexts)
@@ -49,9 +49,42 @@ The javadoc can be created directly from the Maven build:
     $ mvn install
     $ open ./coverity-escapers/target/apidocs/index.html
 
-# <a id="main_usage"></a> Remediation Examples and Usage
+# <a id="main_usage"></a> Usage
 
-## JSP Expression Language XSS Defect
+## Example 1: XSS Defect in Java Servlet
+
+### Before Remediation
+
+The servlet below takes a request parameter called `index` and directly inserts
+it into the output within an HTML context, creating an XSS defect.
+
+    public class IndexServlet extends HttpServlet {
+
+        protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+            String param = request.getParameter("index");           
+            PrintWriter out = response.getWriter();
+            response.setContentType("text/html");
+            out.write("<html><body>Index requested: " + param);
+
+
+### After Remediation
+
+To remedy, the Escape library needs to be imported into the project and then the
+`Escape.html` method should wrap the `param` at the injection point.
+
+    import com.coverity.security.Escape;
+
+    public class IndexServlet extends HttpServlet {
+
+        protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                             throws ServletException, IOException {
+            String param = request.getParameter("index");           
+            PrintWriter out = response.getWriter();
+            response.setContentType("text/html");
+            out.write("<html><body>Index requested: " + Escape.html(param));
+
+## Example 2: XSS Defect in JSP EL
 
 ### Before Remediation
 
@@ -98,39 +131,6 @@ ensure values are properly escaped for the HTML attribute value context.
 
 Note that if you want to limit the number of EL functions imported, you can use the 
 `cov:htmlEscape` function instead of `fn:escapeXml`.
-
-## Java Servlet XSS Defect
-
-### Before Remediation
-
-The servlet below takes a request parameter called `index` and directly inserts
-it into the output within an HTML context, creating an XSS defect.
-
-    public class IndexServlet extends HttpServlet {
-
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + param);
-
-
-### After Remediation
-
-To remedy, the Escape library needs to be imported into the project and then the
-`Escape.html` method should wrap the `param` at the injection point.
-
-    import com.coverity.security.Escape;
-
-    public class IndexServlet extends HttpServlet {
-
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                             throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + Escape.html(param));
 
 # <a id="main_contexts"></a> Background Information
 
