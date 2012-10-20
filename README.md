@@ -5,7 +5,7 @@ Here's why it's worth checking out:
 
 * **It's secure:** We take the security of CSL seriously. Every change is carefully scrutinized through a process that includes manual code review, static analysis, fuzz testing, and unit testing.
 
-* **It's convenient:** CSL contains escapers for XSS and SQL injection that are missing from standard libraries like Apache Commons and JEE.  We use fast, easy to invoke static methods with short, intuitive names.  We also provide hooks for Expression Language (EL) to make it easy to use within JSPs.
+* **It's convenient:** CSL contains escapers for XSS and SQL injection that are missing from standard libraries like Apache Commons and Java EE.  We use fast, easy to invoke static methods with short, intuitive names.  We also provide hooks for Expression Language (EL) to make it easy to use within JSPs.
 
 * **It's free:** CSL is distributed under a BSD-style license.  We would appreciate patches be sent back to us but it's not required.
 
@@ -22,22 +22,29 @@ To include this library into your Maven project, add the following:
 
     <dependency>
         <groupId>com.coverity.security</groupId>
-        <artifactId>coverity-escapers/artifactId>
+        <artifactId>coverity-escapers</artifactId>
         <version>1.0.0</version>
     </dependency>
 
 Then you can use it directly in your JSPs:
 
     <%@ taglib uri="http://coverity.com/security" prefix="cov" %>
-    <script>
+    <script type="text/javascript">
         var x = '${cov:jsStringEscape(param.tainted)}';
     </script>
+    <div onclick="alert('${cov:htmlEscape(cov:jsStringEscape(param.tainted))}')">
+        ${cov:htmlEscape(param.tainted)}
+    </div>
 
 or in your Java programs:
 
     import com.coverity.security.Escape;
     // ...
-    return "<div>" + Escape.html(request.getParameter("tainted")) + </div>;
+    return "<div onclick='alert(\"" 
+           + Escape.jsString(request.getParameter("tainted")) 
+           + "\")'>" 
+           + Escape.html(request.getParameter("tainted")) 
+           + "</div>";
 
 To contact the SRL, please email us at <srl@coverity.com>. Fork away, we look forward to your pull requests!
 
