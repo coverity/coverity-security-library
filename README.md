@@ -41,7 +41,7 @@ or in your Java programs:
     import com.coverity.security.Escape;
     // ...
     return "<div onclick='alert(\"" 
-           + Escape.jsString(request.getParameter("tainted")) 
+           + Escape.html(Escape.jsString(request.getParameter("tainted")))
            + "\")'>" 
            + Escape.html(request.getParameter("tainted")) 
            + "</div>";
