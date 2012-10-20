@@ -1,2 +1,4 @@
 target
+cov_build
+run-analysis.sh
 README.html

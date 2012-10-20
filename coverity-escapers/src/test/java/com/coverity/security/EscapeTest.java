@@ -24,7 +24,10 @@
  *   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
  *   OF SUCH DAMAGE.
  */
-package com.coverity.security;
+package com.coverity.testsuite;
+
+import com.coverity.security.Escape;
+import com.coverity.security.EscapeEL;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -33,33 +36,33 @@ import junit.framework.TestSuite;
 // Unit tests for imporant characters
 public class EscapeTest extends TestCase {
 
-    public static String[] WEB_NEW_LINES = {
+    public final static String[] WEB_NEW_LINES = {
         "\n", "\r", "\f",
         "\u2028", "\u2029"
     };
 
-    public static String[] WEB_WHITESPACES = {
+    public final static String[] WEB_WHITESPACES = {
         " ", "\t"
     };
 
-    public static String[] HTML_SENSITIVE_CHARS = {
+    public final static String[] HTML_SENSITIVE_CHARS = {
         "<", ">",  // HTML tags
         "'", "\"", // HTML attributes
         " ", "/"   // HTML tag/attribute name
     };
 
-    public static String[] JS_STRING_SENSITIVE_CHARS = {
+    public final static String[] JS_STRING_SENSITIVE_CHARS = {
         "'", "\"",     // JavaScript string transition
         "<", "/"       // Potential HTML </script> transition
     };
 
-    public static String[] CSS_STRING_SENSITIVE_CHARS = {
+    public final static String[] CSS_STRING_SENSITIVE_CHARS = {
         "'", "\"",     // CSS string transition
         "<", ">", "&"  // Potential HTML </style> transition
     };
 
     public EscapeTest(String testName) {
-        super( testName );
+        super(testName);
     }
 
     public static Test suite() {
@@ -107,11 +110,46 @@ public class EscapeTest extends TestCase {
     public void testHTMLEscaper_String() {
         // Assume the string is within any HTML tag, like <div>:
         // <div>TAINTED_DATA_HERE</div>
-        String beforeEscape = "</div><script src=\"http://example.com/?evil=true&param=xss\">";
-        String afterEscape = Escape.html(beforeEscape);
-        for (int i=0; i < HTML_SENSITIVE_CHARS.length; i++) {
-            String chr = HTML_SENSITIVE_CHARS[i];
-            assertTrue(!afterEscape.contains(chr));         
+        // or the content of an HTML attibute (not DOM event or CSS style)
+        // <div data-param="TAINTED_DATA_HERE">...
+        String beforeEscape = "</div><script src=\"http://example.com/?evil=true&param=xss\">"
+                            + "\\ Foobar & '\"><img src=. onerorr=alert(1) > ";
+        String afterEscape = Escape.html(beforeEscape)
+                           + EscapeEL.htmlEscape(beforeEscape);
+
+        String[] badSequences = {
+            "<", ">", "<script", "</div", 
+            "\\", "'", " ", "& "
+        };
+
+        for (int i=0; i < badSequences.length; i++) {
+            String badSequence = badSequences[i];
+            assertTrue(!afterEscape.contains(badSequence));         
+        }
+    }
+
+    public void testHTMLTextEscaper_String() {
+        // This escaper Escape.htmlText is a relaxed version of the Escape.html
+        // it only escapes ' " < > & and is sufficient when ALWAYS using quoted
+        // attributes.
+        //
+        // Assume the string is within any HTML tag, like <div>:
+        // <div>TAINTED_DATA_HERE</div>
+        // or the content of an HTML attibute (not DOM event or CSS style)
+        // <div data-param="TAINTED_DATA_HERE">...
+        String beforeEscape = "</div><script src=\"http://example.com/?evil=true&param=xss\">"
+                            + "Foobar & '\"><img src=. onerorr=alert(1) > ";
+        String afterEscape = Escape.htmlText(beforeEscape)
+                           + EscapeEL.htmlText(beforeEscape);
+
+        String[] badSequences = {
+            "<", ">", "<script", "</div", 
+            "'", "\"", "& "
+        };
+
+        for (int i=0; i < badSequences.length; i++) {
+            String badSequence = badSequences[i];
+            assertTrue(!afterEscape.contains(badSequence));         
         }
     }
 
@@ -119,13 +157,18 @@ public class EscapeTest extends TestCase {
         // Assume the string is within an HTML <script> tag, like so:
         // <a href="foobar?value=TAINTED_DATA_HERE">
         String beforeEscape = "close context'\" break context "
-                            + "& + : % </script>";
-        String afterEscape = Escape.uri(beforeEscape);
+                            + "& + : % </script>"
+                            + "\t \n \f \r (!#foobar$) *.*=?[@]";
+        String afterEscape = Escape.uri(beforeEscape) 
+                           + EscapeEL.uriEncode(beforeEscape)
+                           + EscapeEL.uriParamEncode(beforeEscape);
+
         String[] badSequences = {
             "% ",
-            "'",
-            "\"",
-            "+"
+            "'", "\"",
+            "+", "\t", "\n", "\f", "\r",
+            "(", "!", "#", "$", ")", "*", ".", "=", "?",
+            "[", "@", "]"
         };
 
         for (int i=0; i < badSequences.length; i++) {
@@ -137,14 +180,19 @@ public class EscapeTest extends TestCase {
     public void testJSStringEscaper_String() {
         // Assume the string is within an HTML <script> tag, like so:
         // <script> var = 'TAINTED_DATA_HERE'; </script>
-        String beforeEscape = "close context' continue context \\ break context "
-                            + "\u2029 \u2028 escape HTML context </script>";
-        String afterEscape = Escape.jsString(beforeEscape);
+        String beforeEscape = "close context'\" continue context \\ break context "
+                            + "\u2029 \u2028 escape HTML context & </script>"
+                            + " control chars: \b \t \n \u000b \f";
+        String afterEscape = Escape.jsString(beforeEscape)
+                           + EscapeEL.jsStringEscape(beforeEscape);
+
         String[] badSequences = {
-            "' ",
+            "'",
+            "\"",
             " \\ ",
             "\u2028",
             "\u2029",
+            "&", "\b", "\t", "\n", "\u000b", "\f",
             "</script>",
         };
 
@@ -154,16 +202,44 @@ public class EscapeTest extends TestCase {
         }
     }
 
+
+    public void testJSRegexEscaper_String() {
+        // Assume the string is within a JavaScript regex:
+        // <script> var b = /^TAINTED_DATA_HERE/.test("foo"); </script>
+        String beforeEscape = "close context / continue context \\ break context "
+                            + "\u2029 \u2028 escape HTML context & </script>"
+                            + " ( ) [ ] { } * + - . ? ! ^ $ | "
+                            + " control chars: \t \n \u000b \f \r ";
+        String afterEscape = Escape.jsRegex(beforeEscape)
+                           + EscapeEL.jsRegexEscape(beforeEscape);
+
+        String[] badSequences = {
+            "\t", "\n", "\u000b", "\f", "\r",
+            "</script>", " \\ ", " / ",
+            " ( ", " ) ", " [ ", " ] ", " { ", " } ", " * ",
+            " . ", " + ", " - ", " ? ", " ! ", " ^ ", " $ ",
+            " | "
+        };
+
+        for (int i=0; i < badSequences.length; i++) {
+            String badSequence = badSequences[i];
+            assertTrue(!afterEscape.contains(badSequence)); 
+        }
+    }
+
     public void testCSSStringEscaper_String() {
         // Assume the string is within an HTML <style> tag, like so:
         // <style> li [id *= 'TAINTED_DATA_HERE'] { ... } </style>
         String beforeEscape = "close context' \" continue context \\ break context \n"
-                            + " escape HTML context </style>";
-        String afterEscape = Escape.cssString(beforeEscape);
+                            + " escape HTML context </style>"
+                            + " control chars: \b \t \n \f \r";
+        String afterEscape = Escape.cssString(beforeEscape)
+                           + EscapeEL.cssStringEscape(beforeEscape);
+
         String[] badSequences = {
-            "' ",
-            " \\ ",
-            " \n ",
+            "'",
+            "\\ ",
+            "\n", "\r", "\t", "\f", "\r",
             "\"",
             "</style>",
         };
@@ -221,18 +297,24 @@ public class EscapeTest extends TestCase {
     }
 
     public void testForNullInput() {
+        // The test for null inputs is useful to make sure that we do not throw an 
+        // exception when receiving an null EL variable (quite common scenario) 
         try {
             Escape.html(null);
+            Escape.htmlText(null);
             Escape.jsString(null);
+            Escape.jsRegex(null);
             Escape.cssString(null);
             Escape.uri(null);
+            Escape.uriParam(null);
+            Escape.sqlLikeClause(null, '\\');
             Escape.sqlLikeClause(null);
         }
-        catch(NullPointerException ex) {
+        catch(Exception ex) {
+            // Test must fail if any exception is thrown
             assertTrue(false);
         }
     }
-
 
     public void testSQLLikeEscaper_String() {
         assertTrue(Escape.sqlLikeClause("%_@'+=").equals("@%@_@@'+="));
