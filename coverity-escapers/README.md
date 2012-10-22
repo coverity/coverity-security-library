@@ -64,7 +64,7 @@ it into the output within an HTML context, creating an XSS defect.
 public class IndexServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+                         throws ServletException, IOException {
         String param = request.getParameter("index");           
         PrintWriter out = response.getWriter();
         response.setContentType("text/html");
@@ -101,18 +101,18 @@ by the JSTL `fn:escapeXml` method, the defect still exists because the underlyin
 JavaScript string context is not addressed.
 
 ```jsp
-    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
-    <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="/static/js/main.js"></script>
-    </head>
-    <body>
-    <span onmouseover="lookupHelp('${fn:escapeXml(param.needHelp)}');">
-        Hello Blogger!
-    </span>
+<!doctype html>
+<html>
+<head>
+    <script src="/static/js/main.js"></script>
+</head>
+<body>
+<span onmouseover="lookupHelp('${fn:escapeXml(param.needHelp)}');">
+    Hello Blogger!
+</span>
 ```
 
 ### After Remediation
@@ -123,19 +123,19 @@ the injection point. The outer `fn:escapeXml` method should still be used to
 ensure values are properly escaped for the HTML attribute value context.
 
 ```jsp
-    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
-    <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
-    <%@ taglib prefix="cov" uri="http://coverity.com/security" %>
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+<%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="cov" uri="http://coverity.com/security" %>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="/static/js/main.js"></script>
-    </head>
-    <body>
-    <span onmouseover="lookupHelp('${fn:escapeXml(cov:jsStringEscape(param.needHelp))}');">
-        Hello Blogger!
-    </span>
+<!doctype html>
+<html>
+<head>
+    <script src="/static/js/main.js"></script>
+</head>
+<body>
+<span onmouseover="lookupHelp('${fn:escapeXml(cov:jsStringEscape(param.needHelp))}');">
+    Hello Blogger!
+</span>
 ```
 
 Note that if you want to limit the number of EL functions imported, you can use the 
@@ -270,11 +270,11 @@ such as HTML, JavaScript, or CSS.
 Injection examples:
 ```html
 <style>
-    span[id="clickmes"] {
+    #clickme a {
       background-image: url('TAINTED_DATA_HERE');
     }
 </style>
-<a href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
+<a id="clickme" href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
 ```
 When the tainted data is inserted as a query parameter, the Escape library
 meets the URI query parameter obligations by encoding sensitive characters using
