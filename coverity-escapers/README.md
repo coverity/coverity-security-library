@@ -28,7 +28,7 @@ To include this library into your Maven project, add the following to your pom:
 
 ```xml
 <dependency>
-    <groupId>com.coverity.security</groupId>
+    <groupId>com.coverity</groupId>
     <artifactId>coverity-escapers</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -43,6 +43,11 @@ We use maven to build the library, and you can simply do:
 A JAR file will be created in the `coverity-escapers/target` directory. You can take
 this JAR file `coverity-escaper-1.0.0.jar` and place it in the `WEB-INF/lib` of your
 application.
+
+To use the Escape library in a JSP scriptlet, you need to import the class:
+```jsp
+<%@ page import="com.coverity.security.Escape" %>
+```
 
 ## Build the Javadoc
 The javadoc can be created directly from the Maven build:
@@ -222,6 +227,10 @@ HTML quoted attribute injection example:
 The Escape library meets the security obligations of these contexts by encoding
 sensitive characters as HTML character references.
 
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.html()</code>
+* JSP EL: <code>${cov:htmlEscape()}</code>
+
 ### JavaScript Strings (Single and Double Quoted)
 
 ECMA 262 defines the [ECMAScript language] [2], of which JavaScript is a dialect.
@@ -229,7 +238,6 @@ The standard defines a string literal syntax for both ' and " strings in section
 7.8.4 (of the ECMA PDF file).
 
 Injection example:
-
 ```js
 var blogComment = 'TAINTED_DATA_HERE';
 logBlogComment(blogComment, "TAINTED_DATA_HERE_TOO");
@@ -242,6 +250,10 @@ the security obligations which apply for the script tag. This is easily
 summarized as the tag should not be closed, and the string literal `</script>`
 should not appear in the JavaScript string. For this purpose, we also escape
 the `/` character.
+
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.jsString()</code>
+* JSP EL: <code>${cov:jsStringEscape()}</code>
 
 ### CSS Strings (Single and Double Quoted)
 
@@ -261,6 +273,10 @@ contexts are often in a parent `<script>` tag, CSS contexts often have a parent
 HTML context within the `<style>` tag. For the same reason as JavaScript, we also
 escape the `/` character.
 
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.cssString()</code>
+* JSP EL: <code>${cov:cssStringEscape()}</code>
+
 ### URIs
 
 The URI context is comprised of numerous sub-contexts. [RFC 3986] [8] provides
@@ -279,6 +295,10 @@ Injection examples:
 When the tainted data is inserted as a query parameter, the Escape library
 meets the URI query parameter obligations by encoding sensitive characters using
 URI percent encoding.
+
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.uri()</code>
+* JSP EL: <code>${cov:uriEncode()}</code>
 
 ### SQL LIKE Context
 
@@ -310,6 +330,9 @@ entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query ESCA
 Note: the Escape library does not prevent SQL injection issues. It preserves
 the meaning of the LIKE query by escaping only characters with special meaning
 in a LIKE clause.
+
+Escape function to use:
+* Java/JSP scriptlet: <code>Escape.sqlLikeClause()</code>
 
 ### Unquoted 
 
