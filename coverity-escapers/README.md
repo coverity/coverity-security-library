@@ -334,12 +334,12 @@ in a LIKE clause.
 Escape function to use:
 * Java/JSP scriptlet: <code>Escape.sqlLikeClause()</code>
 
-### Unquoted 
+### Unquoted HTML attributes or CSS URI
 
-HTML allows attribute values and CSS allows URI values to be used in an unquoted contexts, along
+HTML allows attribute values and CSS allows URI values to be used in an unquoted values, along
 with their single and double-quoted alternatives. We recommend not using the 
-unquoted context in HTML or CSS. Rather, use the double-quoted context. The reasoning
-is that unquoted contexts make it even more difficult to mitigate and are sometimes
+unquoted values in HTML or CSS. Rather, use the double or single quoted values. The reasoning
+is that unquoted values make it even more difficult to mitigate and are sometimes
 web browser specific.
 
 # <a id="main_authors"></a> Authors
