@@ -27,6 +27,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://coverity.com/security" prefix="cov" %>
+
+<%@ page import="com.coverity.security.Escape" %>
 <!--
     Sample JSP page that contains some mocked-up CSS, JavaScript, 
     and HTML. Using EL for most of the data manipulation, and the 

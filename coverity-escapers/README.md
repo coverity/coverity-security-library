@@ -15,7 +15,7 @@ and understands their behavior; however, there is no dependency on
 Coverity products. This library is completely standalone. Feel free to
 use them! Just make sure you use them correctly :)
 
-### Table of Content
+### Table of Contents
 1. [Installation](#main_install)
 2. [Usage](#main_usage)
 3. [HTML Contexts Examples](#main_contexts)
@@ -26,11 +26,13 @@ use them! Just make sure you use them correctly :)
 ## Using Maven
 To include this library into your Maven project, add the following to your pom:
 
-    <dependency>
-        <groupId>com.coverity.security</groupId>
-        <artifactId>coverity-escapers</artifactId>
-        <version>1.0.0</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>com.coverity</groupId>
+    <artifactId>coverity-escapers</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 ## Manually Build and Deploy
 We use maven to build the library, and you can simply do:
@@ -42,6 +44,11 @@ A JAR file will be created in the `coverity-escapers/target` directory. You can 
 this JAR file `coverity-escaper-1.0.0.jar` and place it in the `WEB-INF/lib` of your
 application.
 
+To use the Escape library in a JSP scriptlet, you need to import the class:
+```jsp
+<%@ page import="com.coverity.security.Escape" %>
+```
+
 ## Build the Javadoc
 The javadoc can be created directly from the Maven build:
 
@@ -49,9 +56,45 @@ The javadoc can be created directly from the Maven build:
     $ mvn install
     $ open ./coverity-escapers/target/apidocs/index.html
 
-# <a id="main_usage"></a> Remediation Examples and Usage
+# <a id="main_usage"></a> Usage
 
-## JSP Expression Language XSS Defect
+## Example 1: XSS Defect in Java Servlet
+
+### Before Remediation
+
+The servlet below takes a request parameter called `index` and directly inserts
+it into the output within an HTML context, creating an XSS defect.
+
+```java
+public class IndexServlet extends HttpServlet {
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                         throws ServletException, IOException {
+        String param = request.getParameter("index");           
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
+        out.write("<html><body>Index requested: " + param);
+```
+
+### After Remediation
+
+To remedy, the Escape library needs to be imported into the project and then the
+`Escape.html` method should wrap the `param` at the injection point.
+
+```java
+import com.coverity.security.Escape;
+// ...
+public class IndexServlet extends HttpServlet {
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                         throws ServletException, IOException {
+        String param = request.getParameter("index");           
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
+        out.write("<html><body>Index requested: " + Escape.html(param));
+```
+
+## Example 2: XSS Defect in JSP EL
 
 ### Before Remediation
 
@@ -62,18 +105,20 @@ Expression Language (EL) to insert the value. While this tainted data is wrapped
 by the JSTL `fn:escapeXml` method, the defect still exists because the underlying
 JavaScript string context is not addressed.
 
-    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
-    <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+```jsp
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="/static/js/main.js"></script>
-    </head>
-    <body>
-    <span onmouseover="lookupHelp('${fn:escapeXml(param.needHelp)}');">
-        Hello Blogger!
-    </span>
+<!doctype html>
+<html>
+<head>
+    <script src="/static/js/main.js"></script>
+</head>
+<body>
+<span onmouseover="lookupHelp('${fn:escapeXml(param.needHelp)}');">
+    Hello Blogger!
+</span>
+```
 
 ### After Remediation
 
@@ -82,55 +127,24 @@ and then the `cov:jsStringEscape` EL method needs to wrap the `param.needHelp` a
 the injection point. The outer `fn:escapeXml` method should still be used to
 ensure values are properly escaped for the HTML attribute value context.
 
-    <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
-    <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
-    <%@ taglib prefix="cov" uri="http://coverity.com/security" %>
+```jsp
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+<%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="cov" uri="http://coverity.com/security" %>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="/static/js/main.js"></script>
-    </head>
-    <body>
-    <span onmouseover="lookupHelp('${fn:escapeXml(cov:jsStringEscape(param.needHelp))}');">
-        Hello Blogger!
-    </span>
+<!doctype html>
+<html>
+<head>
+    <script src="/static/js/main.js"></script>
+</head>
+<body>
+<span onmouseover="lookupHelp('${fn:escapeXml(cov:jsStringEscape(param.needHelp))}');">
+    Hello Blogger!
+</span>
+```
 
 Note that if you want to limit the number of EL functions imported, you can use the 
 `cov:htmlEscape` function instead of `fn:escapeXml`.
-
-## Java Servlet XSS Defect
-
-### Before Remediation
-
-The servlet below takes a request parameter called `index` and directly inserts
-it into the output within an HTML context, creating an XSS defect.
-
-    public class IndexServlet extends HttpServlet {
-
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + param);
-
-
-### After Remediation
-
-To remedy, the Escape library needs to be imported into the project and then the
-`Escape.html` method should wrap the `param` at the injection point.
-
-    import com.coverity.security.Escape;
-
-    public class IndexServlet extends HttpServlet {
-
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                             throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + Escape.html(param));
 
 # <a id="main_contexts"></a> Background Information
 
@@ -142,7 +156,9 @@ obligations. A context defines a subset of a language and syntax rules. For
 example, the following `TAINTED_DATA_HERE` text occurs in an HTML double-quoted
 attribute context.
 
-    <span id="TAINTED_DATA_HERE">Some text here</span>
+```html
+<span id="TAINTED_DATA_HERE">Some text here</span>
+```
 
 When tainted data is able to circumvent a context, it can lead to a security
 defect, such as a cross-site scripting (XSS), SQL injection (SQLi), etc.. For
@@ -165,7 +181,9 @@ but a set of names should also be disallowed since they might create an XSS defe
 A nested context occurs when more than one context exists for a given piece of
 data. An example is the common HTML `<a>` anchor element and its `onclick` attribute:
 
-    <a onclick="pullAuthor('TAINTED_DATA_HERE');return false;" ...
+```html
+<a onclick="pullAuthor('TAINTED_DATA_HERE');return false;">...
+```
 
 In the example, there are currently two contexts that have safety obligations
 for `TAINTED_DATA_HERE`:
@@ -194,16 +212,24 @@ The Escape library groups the following HTML contexts as one:
 
 HTML normal element injection example:
 
-    <span>TAINTED_DATA_HERE</span>
+```html
+<span>TAINTED_DATA_HERE</span>
+```
 
 HTML quoted attribute injection example:
 
-    <div id="TAINTED_DATA_HERE">
-      <span id='TAINTED_DATA_HERE_TOO'>Testing blog</span>
-    </div>
+```html
+<div id="TAINTED_DATA_HERE">
+    <span id='TAINTED_DATA_HERE_TOO'>Testing blog</span>
+</div>
+```
 
 The Escape library meets the security obligations of these contexts by encoding
 sensitive characters as HTML character references.
+
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.html()</code>
+* JSP EL: <code>${cov:htmlEscape()}</code>
 
 ### JavaScript Strings (Single and Double Quoted)
 
@@ -212,9 +238,10 @@ The standard defines a string literal syntax for both ' and " strings in section
 7.8.4 (of the ECMA PDF file).
 
 Injection example:
-
-    var blogComment = 'TAINTED_DATA_HERE';
-    logBlogComment(blogComment, "TAINTED_DATA_HERE_TOO");
+```js
+var blogComment = 'TAINTED_DATA_HERE';
+logBlogComment(blogComment, "TAINTED_DATA_HERE_TOO");
+```
 
 The Escape library meets the security obligations of these contexts by escaping
 these characters using JavaScript Unicode escaping. In addition, since JavaScript
@@ -224,6 +251,10 @@ summarized as the tag should not be closed, and the string literal `</script>`
 should not appear in the JavaScript string. For this purpose, we also escape
 the `/` character.
 
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.jsString()</code>
+* JSP EL: <code>${cov:jsStringEscape()}</code>
+
 ### CSS Strings (Single and Double Quoted)
 
 CSS Level 2, Revision 1 (CSS 2.1) defines single-quoted (', U+0027) and
@@ -231,16 +262,20 @@ double-quoted (", U+0022) [strings] [3]. These strings are also used within a UR
 quoted context and have the same obligations within that context.
 
 Injection example:
-
-    span[id="TAINTED_DATA_HERE"] {
-      background-color: #efefef;
-    }
-
+```css
+span[id="TAINTED_DATA_HERE"] {
+  background-color: #efefef;
+}
+```
 The Escape library meets the security obligations of these contexts by escaping
 these characters using CSS Unicode escaping. Just as JavaScript string
 contexts are often in a parent `<script>` tag, CSS contexts often have a parent
 HTML context within the `<style>` tag. For the same reason as JavaScript, we also
 escape the `/` character.
+
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.cssString()</code>
+* JSP EL: <code>${cov:cssStringEscape()}</code>
 
 ### URIs
 
@@ -249,17 +284,21 @@ details on each of them. When used in HTML, the URL context includes some parent
 such as HTML, JavaScript, or CSS.
 
 Injection examples:
-
-    <style>
-        span[id="clickmes"] {
-          background-image: url('TAINTED_DATA_HERE');
-        }
-    </style>
-    <a href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
-
+```html
+<style>
+    #clickme a {
+      background-image: url('TAINTED_DATA_HERE');
+    }
+</style>
+<a id="clickme" href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
+```
 When the tainted data is inserted as a query parameter, the Escape library
 meets the URI query parameter obligations by encoding sensitive characters using
 URI percent encoding.
+
+Escape functions to use:
+* Java/JSP scriptlet: <code>Escape.uri()</code>
+* JSP EL: <code>${cov:uriEncode()}</code>
 
 ### SQL LIKE Context
 
@@ -273,27 +312,34 @@ returned, changing the intent of the query.
 
 Injection example:
 
-    entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query")
-                 .setParameter("like_query", "%" + TAINTED_DATA_HERE)
-                 .getResultList();
+```java
+entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query")
+             .setParameter("like_query", "%" + TAINTED_DATA_HERE)
+             .getResultList();
+```
 
 The Escape library meets these obligations by escaping these wildcard characters
 using an additional escape character, by default the at sign (@, U+0040):
 
-    entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query ESCAPE '@'")
-                 .setParameter("like_query", "%" + Escape.sqlLikeClause(TAINTED_DATA_HERE))
-                 .getResultList();
+```java
+entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query ESCAPE '@'")
+             .setParameter("like_query", "%" + Escape.sqlLikeClause(TAINTED_DATA_HERE))
+             .getResultList();
+```
 
 Note: the Escape library does not prevent SQL injection issues. It preserves
 the meaning of the LIKE query by escaping only characters with special meaning
 in a LIKE clause.
 
-### Unquoted 
+Escape function to use:
+* Java/JSP scriptlet: <code>Escape.sqlLikeClause()</code>
 
-HTML allows attribute values and CSS allows URI values to be used in an unquoted contexts, along
+### Unquoted HTML attributes or CSS URI
+
+HTML allows attribute values and CSS allows URI values to be used in an unquoted values, along
 with their single and double-quoted alternatives. We recommend not using the 
-unquoted context in HTML or CSS. Rather, use the double-quoted context. The reasoning
-is that unquoted contexts make it even more difficult to mitigate and are sometimes
+unquoted values in HTML or CSS. Rather, use the double or single quoted values. The reasoning
+is that unquoted values make it even more difficult to mitigate and are sometimes
 web browser specific.
 
 # <a id="main_authors"></a> Authors
