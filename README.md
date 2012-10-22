@@ -1,5 +1,5 @@
 # Coverity Security Library
-The Coverity Security Library (CSL) is a lightweight set of escaping routines for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.  CSL is small, simple, and easy to use.
+The Coverity Security Library (CSL) is a lightweight set of escaping routines for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.
 
 Here's why it's worth checking out:
 
