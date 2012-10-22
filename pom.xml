@@ -17,6 +17,13 @@
         </license>
     </licenses>
 
+    <!--  https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide -->
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <scm>
         <connection>scm:git:git@github.com:coverity/coverity-security-library.git</connection>
         <developerConnection>scm:git:git@github.com:coverity/coverity-security-library.git</developerConnection>
