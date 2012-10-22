@@ -26,11 +26,13 @@ use them! Just make sure you use them correctly :)
 ## Using Maven
 To include this library into your Maven project, add the following to your pom:
 
-    <dependency>
-        <groupId>com.coverity.security</groupId>
-        <artifactId>coverity-escapers</artifactId>
-        <version>1.0.0</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>com.coverity.security</groupId>
+    <artifactId>coverity-escapers</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
 ## Manually Build and Deploy
 We use maven to build the library, and you can simply do:
@@ -58,31 +60,34 @@ The javadoc can be created directly from the Maven build:
 The servlet below takes a request parameter called `index` and directly inserts
 it into the output within an HTML context, creating an XSS defect.
 
-    public class IndexServlet extends HttpServlet {
+```java
+public class IndexServlet extends HttpServlet {
 
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + param);
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+        String param = request.getParameter("index");           
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
+        out.write("<html><body>Index requested: " + param);
+```
 
 ### After Remediation
 
 To remedy, the Escape library needs to be imported into the project and then the
 `Escape.html` method should wrap the `param` at the injection point.
 
-    import com.coverity.security.Escape;
+```java
+import com.coverity.security.Escape;
+// ...
+public class IndexServlet extends HttpServlet {
 
-    public class IndexServlet extends HttpServlet {
-
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                             throws ServletException, IOException {
-            String param = request.getParameter("index");           
-            PrintWriter out = response.getWriter();
-            response.setContentType("text/html");
-            out.write("<html><body>Index requested: " + Escape.html(param));
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                         throws ServletException, IOException {
+        String param = request.getParameter("index");           
+        PrintWriter out = response.getWriter();
+        response.setContentType("text/html");
+        out.write("<html><body>Index requested: " + Escape.html(param));
+```
 
 ## Example 2: XSS Defect in JSP EL
 
@@ -95,6 +100,7 @@ Expression Language (EL) to insert the value. While this tainted data is wrapped
 by the JSTL `fn:escapeXml` method, the defect still exists because the underlying
 JavaScript string context is not addressed.
 
+```jsp
     <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
     <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
@@ -107,6 +113,7 @@ JavaScript string context is not addressed.
     <span onmouseover="lookupHelp('${fn:escapeXml(param.needHelp)}');">
         Hello Blogger!
     </span>
+```
 
 ### After Remediation
 
@@ -115,6 +122,7 @@ and then the `cov:jsStringEscape` EL method needs to wrap the `param.needHelp` a
 the injection point. The outer `fn:escapeXml` method should still be used to
 ensure values are properly escaped for the HTML attribute value context.
 
+```jsp
     <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
     <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
     <%@ taglib prefix="cov" uri="http://coverity.com/security" %>
@@ -128,6 +136,7 @@ ensure values are properly escaped for the HTML attribute value context.
     <span onmouseover="lookupHelp('${fn:escapeXml(cov:jsStringEscape(param.needHelp))}');">
         Hello Blogger!
     </span>
+```
 
 Note that if you want to limit the number of EL functions imported, you can use the 
 `cov:htmlEscape` function instead of `fn:escapeXml`.
@@ -142,7 +151,9 @@ obligations. A context defines a subset of a language and syntax rules. For
 example, the following `TAINTED_DATA_HERE` text occurs in an HTML double-quoted
 attribute context.
 
-    <span id="TAINTED_DATA_HERE">Some text here</span>
+```html
+<span id="TAINTED_DATA_HERE">Some text here</span>
+```
 
 When tainted data is able to circumvent a context, it can lead to a security
 defect, such as a cross-site scripting (XSS), SQL injection (SQLi), etc.. For
@@ -165,7 +176,9 @@ but a set of names should also be disallowed since they might create an XSS defe
 A nested context occurs when more than one context exists for a given piece of
 data. An example is the common HTML `<a>` anchor element and its `onclick` attribute:
 
-    <a onclick="pullAuthor('TAINTED_DATA_HERE');return false;" ...
+```html
+<a onclick="pullAuthor('TAINTED_DATA_HERE');return false;">...
+```
 
 In the example, there are currently two contexts that have safety obligations
 for `TAINTED_DATA_HERE`:
@@ -194,13 +207,17 @@ The Escape library groups the following HTML contexts as one:
 
 HTML normal element injection example:
 
-    <span>TAINTED_DATA_HERE</span>
+```html
+<span>TAINTED_DATA_HERE</span>
+```
 
 HTML quoted attribute injection example:
 
-    <div id="TAINTED_DATA_HERE">
-      <span id='TAINTED_DATA_HERE_TOO'>Testing blog</span>
-    </div>
+```html
+<div id="TAINTED_DATA_HERE">
+    <span id='TAINTED_DATA_HERE_TOO'>Testing blog</span>
+</div>
+```
 
 The Escape library meets the security obligations of these contexts by encoding
 sensitive characters as HTML character references.
@@ -213,8 +230,10 @@ The standard defines a string literal syntax for both ' and " strings in section
 
 Injection example:
 
-    var blogComment = 'TAINTED_DATA_HERE';
-    logBlogComment(blogComment, "TAINTED_DATA_HERE_TOO");
+```js
+var blogComment = 'TAINTED_DATA_HERE';
+logBlogComment(blogComment, "TAINTED_DATA_HERE_TOO");
+```
 
 The Escape library meets the security obligations of these contexts by escaping
 these characters using JavaScript Unicode escaping. In addition, since JavaScript
@@ -231,11 +250,11 @@ double-quoted (", U+0022) [strings] [3]. These strings are also used within a UR
 quoted context and have the same obligations within that context.
 
 Injection example:
-
-    span[id="TAINTED_DATA_HERE"] {
-      background-color: #efefef;
-    }
-
+```css
+span[id="TAINTED_DATA_HERE"] {
+  background-color: #efefef;
+}
+```
 The Escape library meets the security obligations of these contexts by escaping
 these characters using CSS Unicode escaping. Just as JavaScript string
 contexts are often in a parent `<script>` tag, CSS contexts often have a parent
@@ -249,14 +268,14 @@ details on each of them. When used in HTML, the URL context includes some parent
 such as HTML, JavaScript, or CSS.
 
 Injection examples:
-
-    <style>
-        span[id="clickmes"] {
-          background-image: url('TAINTED_DATA_HERE');
-        }
-    </style>
-    <a href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
-
+```html
+<style>
+    span[id="clickmes"] {
+      background-image: url('TAINTED_DATA_HERE');
+    }
+</style>
+<a href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
+```
 When the tainted data is inserted as a query parameter, the Escape library
 meets the URI query parameter obligations by encoding sensitive characters using
 URI percent encoding.
@@ -273,16 +292,20 @@ returned, changing the intent of the query.
 
 Injection example:
 
-    entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query")
-                 .setParameter("like_query", "%" + TAINTED_DATA_HERE)
-                 .getResultList();
+```java
+entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query")
+             .setParameter("like_query", "%" + TAINTED_DATA_HERE)
+             .getResultList();
+```
 
 The Escape library meets these obligations by escaping these wildcard characters
 using an additional escape character, by default the at sign (@, U+0040):
 
-    entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query ESCAPE '@'")
-                 .setParameter("like_query", "%" + Escape.sqlLikeClause(TAINTED_DATA_HERE))
-                 .getResultList();
+```java
+entityManager.createQuery("FROM MyEntity e WHERE e.content LIKE :like_query ESCAPE '@'")
+             .setParameter("like_query", "%" + Escape.sqlLikeClause(TAINTED_DATA_HERE))
+             .getResultList();
+```
 
 Note: the Escape library does not prevent SQL injection issues. It preserves
 the meaning of the LIKE query by escaping only characters with special meaning
