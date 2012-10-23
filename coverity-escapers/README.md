@@ -21,7 +21,7 @@ use them! Just make sure you use them correctly :)
 3. [HTML Contexts Examples](#main_contexts)
 4. [Authors & License](#main_authors)
 
-# <a id="install"></a>Installation
+# <a id="install" name="install"></a>Installation
 
 ## Using Maven
 To include this library into your Maven project, add the following to your pom:
@@ -56,7 +56,7 @@ The javadoc can be created directly from the Maven build:
     $ mvn install
     $ open ./coverity-escapers/target/apidocs/index.html
 
-# <a id="main_usage"></a> Usage
+# <a id="main_usage" name="main_usage"></a> Usage
 
 ## Example 1: XSS Defect in Java Servlet
 
