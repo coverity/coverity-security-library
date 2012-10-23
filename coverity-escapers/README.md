@@ -287,7 +287,7 @@ Injection examples:
 ```html
 <style>
     #clickme a {
-      background-image: url('TAINTED_DATA_HERE');
+      background-image: url('/pull-image/?id=TAINTED_DATA_HERE');
     }
 </style>
 <a id="clickme" href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
