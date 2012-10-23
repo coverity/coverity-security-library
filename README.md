@@ -24,7 +24,7 @@ To include this library into your Maven project, add the following:
 
 ```xml
 <dependency>
-    <groupId>com.coverity</groupId>
+    <groupId>com.coverity.security</groupId>
     <artifactId>coverity-escapers</artifactId>
     <version>1.0</version>
 </dependency>
