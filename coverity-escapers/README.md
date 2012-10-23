@@ -146,7 +146,7 @@ ensure values are properly escaped for the HTML attribute value context.
 Note that if you want to limit the number of EL functions imported, you can use the 
 `cov:htmlEscape` function instead of `fn:escapeXml`.
 
-# <a id="main_contexts"></a> Background Information
+# <a id="main_contexts" name="main_contexts"></a> Background Information
 
 ## Contexts
 
@@ -342,7 +342,7 @@ unquoted values in HTML or CSS. Rather, use the double or single quoted values. 
 is that unquoted values make it even more difficult to mitigate and are sometimes
 web browser specific.
 
-# <a id="main_authors"></a> Authors
+# <a id="main_authors" name="main_authors"></a> Authors
 The Escape library was developed by the [Coverity Security Research Lab](http://www.coverity.com) members:
 * Romain Gaucher, [@rgaucher](https://twitter.com/rgaucher)
 * Andy Chou, [@_achou](https://twitter.com/_achou)
