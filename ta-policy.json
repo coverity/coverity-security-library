@@ -1,5 +1,5 @@
 {
-    "type": "Coverity test policy definition for Coverity Security Library",
+    "type": "Coverity test policy definition",
     "format_version": 1,
     "rules" : [{
         "violation_name" : "security-sanitizer-policy",
