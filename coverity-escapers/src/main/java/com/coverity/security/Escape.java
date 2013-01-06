@@ -392,6 +392,9 @@ public class Escape {
      *                       <code>\ (U+005C)</code> 
      * </li>
      * <li>
+     * URI encoding characters: <code>% (U+0025)</code>
+     * </li>
+     * <li>
      * HTML characters: <code>/ (U+002F)</code>,
      *                  <code>&lt; (U+003C)</code>, <code>&gt; (U+003E)</code>, 
      *                  <code>&amp; (U+0026)</code>
@@ -448,6 +451,10 @@ public class Escape {
                 break;
             case '\\':
                 output.append("\\u005C");
+                break;
+            // URI encoding char
+            case '%':
+                output.append("\\u0025");
                 break;
             // HTML chars for closing the parent context
             case '&':

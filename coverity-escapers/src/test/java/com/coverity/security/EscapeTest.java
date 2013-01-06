@@ -182,7 +182,7 @@ public class EscapeTest extends TestCase {
         // <script> var = 'TAINTED_DATA_HERE'; </script>
         String beforeEscape = "close context'\" continue context \\ break context "
                             + "\u2029 \u2028 escape HTML context & </script>"
-                            + " control chars: \b \t \n \u000b \f";
+                            + " control chars: \b \t \n \u000b \f %22";
         String afterEscape = Escape.jsString(beforeEscape)
                            + EscapeEL.jsStringEscape(beforeEscape);
 
@@ -192,7 +192,7 @@ public class EscapeTest extends TestCase {
             " \\ ",
             "\u2028",
             "\u2029",
-            "&", "\b", "\t", "\n", "\u000b", "\f",
+            "&", "\b", "\t", "\n", "\u000b", "\f", "%",
             "</script>",
         };
 
