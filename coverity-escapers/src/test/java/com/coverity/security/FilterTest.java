@@ -148,26 +148,28 @@ public class FilterTest extends TestCase {
             Method n = FilterEL.class.getDeclaredMethod(testedFunction, 
                                                       new Class[] { String.class });
 
+            Object nullObject = null;
+
             for (int i=0; i<falseCases.length; i++) {
                 String testcase = falseCases[i];
                 if (printIter)
-                    System.out.println(testcase + " -> " + m.invoke(null, testcase));
-                assertTrue(m.invoke(null, testcase) == null);
-                assertTrue(n.invoke(null, testcase) == null);
+                    System.out.println(testcase + " -> " + m.invoke(nullObject, new Object[] {testcase}));
+                assertTrue(m.invoke(nullObject, new Object[] {testcase}) == null);
+                assertTrue(n.invoke(nullObject, new Object[] {testcase}) == null);
             }
 
             for (int i=0; i<trueCases.length; i++) {
                 String testcase = trueCases[i];
                 if (printIter)
-                    System.out.println(testcase + " -> " + m.invoke(null, testcase));
-                assertTrue(m.invoke(null, testcase) == testcase);
-                assertTrue(n.invoke(null, testcase) == testcase);
+                    System.out.println(testcase + " -> " + m.invoke(nullObject, new Object[] {testcase}));
+                assertTrue(m.invoke(nullObject, new Object[] {testcase}) == testcase);
+                assertTrue(n.invoke(nullObject, new Object[] {testcase}) == testcase);
             }
 
             // Assert null
             String nullString = null;
-            assertTrue(m.invoke(null, nullString) == null);
-            assertTrue(n.invoke(null, nullString) == null);
+            assertTrue(m.invoke(nullObject, new Object[] {nullString}) == null);
+            assertTrue(n.invoke(nullObject, new Object[] {nullString}) == null);
         }
         catch (NoSuchMethodException ex) {
             System.out.println(ex.getMessage());
