@@ -55,4 +55,29 @@
         <function-signature>java.lang.String cssStringEscape(java.lang.String)</function-signature>
     </function>
     
+
+    <!-- Filters -->
+    <function>
+        <name>asNumber</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asNumber(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asHex</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asHex(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asCssHexColor</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssHexColor(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>asCssNamedColor</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssNamedColor(java.lang.String)</function-signature>
+    </function>
 </taglib>
