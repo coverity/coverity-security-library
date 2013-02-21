@@ -40,6 +40,11 @@
             <name>Jon Passki</name>
             <email>jpasski@coverity.com</email>
         </developer>
+        <developer>
+            <id>kuza55</id>
+            <name>Alex Kouzemtchenko</name>
+            <email>akouzemtchenko@coverity.com</email>
+        </developer>
     </developers>
 
     <properties>
