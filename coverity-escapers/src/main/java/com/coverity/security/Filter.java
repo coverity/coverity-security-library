@@ -134,7 +134,7 @@ public class Filter {
     
     /**
      * Identical to asCssColor, except you can provide your own default value
-     * @param number        the potential css color to filter
+     * @param color           the potential css color to filter
      * @param defaultColor    a default String to return if the color argument is not a potentially valid CSS color 
      * @return                a sanitised color or defaultColor if there is no conversion
      */
