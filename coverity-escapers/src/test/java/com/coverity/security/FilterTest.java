@@ -51,34 +51,60 @@ public class FilterTest extends TestCase {
         return new TestSuite(FilterTest.class);
     }
 
+    private static String CssDefault = "invalid";
+    private static String testAsColorWrapper(String color) {
+        String filtered = Filter.asCssColor(color);
+        
+        if (filtered == null || (filtered.equals(CssDefault) && !color.trim().equals(CssDefault))) {
+            return null;
+        } else {
+            return color;
+        }
+    }
 
-    public void testAsCssNamedColor() {
-        String[] numberFalseTests = {
+    private static String testAsColorWrapperEL(String color) {
+        String filtered = FilterEL.asCssColor(color);
+        
+        if (filtered == null || (filtered.equals(CssDefault) && !color.trim().equals(CssDefault))) {
+            return null;
+        } else {
+            return color;
+        }
+    }
+
+    private static String CssDefault2 = "blue";
+    private static String testAsColorWrapperDefault(String color) {
+        String filtered = Filter.asCssColor(color, CssDefault2);
+        
+        if (filtered == null || (filtered.equals(CssDefault2) && !color.trim().equals(CssDefault2))) {
+            return null;
+        } else {
+            return color;
+        }
+    }
+
+    private static String testAsColorWrapperELDefault(String color) {
+        String filtered = FilterEL.asCssColorDefault(color, CssDefault2);
+        
+        if (filtered == null || (filtered.equals(CssDefault2) && !color.trim().equals(CssDefault2))) {
+            return null;
+        } else {
+            return color;
+        }
+    }
+
+    public void testAsCssColor() {
+        String[] colorFalseTests = {
+            //named Color
             "#1",
             "this is not a name",
             "efe fef",
             "foo()<>{}",
             "\09 thisIsPossibleButNotConsidered",
-            "#efefef"
-        };
 
-        String[] numberTrueTests = {
-            "AliceBlue",
-            "white",
-            "PaleVioletRed"
-        };
-
-        runTrueFalseCases(numberFalseTests,
-                          numberTrueTests,
-                          "asCssNamedColor",
-                          /*printIter*/false);
-    }
-
-    public void testAsCssHexColor() {
-        String[] numberFalseTests = {
+            //Hex Color
             "#1",
             "12345",
-            "efefef",
             "#12",
             "#1223",
             "#12233",
@@ -89,63 +115,309 @@ public class FilterTest extends TestCase {
             ""
         };
 
-        String[] numberTrueTests = {
+        String[] colorTrueTests = {
+            //Named Color
+            "AliceBlue",
+            "white",
+            "PaleVioletRed",
+
+            //Hex Color
             "#fff",
             "#FFF",
             "#0fF056"
         };
-        runTrueFalseCases(numberFalseTests,
-                          numberTrueTests,
-                          "asCssHexColor",
+
+        runTrueFalseCases(colorFalseTests,
+                          colorTrueTests,
+                          FilterTest.class,
+                          "testAsColorWrapper",
+                          /*printIter*/false);
+
+        runTrueFalseCases(colorFalseTests,
+                          colorTrueTests,
+                          FilterTest.class,
+                          "testAsColorWrapperEL",
+                          /*printIter*/false);
+
+        runTrueFalseCases(colorFalseTests,
+                          colorTrueTests,
+                          FilterTest.class,
+                          "testAsColorWrapperDefault",
+                          /*printIter*/false);
+
+        runTrueFalseCases(colorFalseTests,
+                          colorTrueTests,
+                          FilterTest.class,
+                          "testAsColorWrapperELDefault",
                           /*printIter*/false);
     }
 
-    public void testAsHex() {
-        String[] numberFalseTests = {
-            "efefefg",
-            "0.23233112",
-            "0xdfdfdf"
-        };
+    private static String testAsNumberWrapper(String number) {
+        String filtered = Filter.asNumber(number);
+        
+        if (filtered == null || (filtered.equals("0") && !(number.trim().equals("0")))) {
+            return null;
+        } else {
+            return number;
+        }
+    }
 
-        String[] numberTrueTests = {
-            "efefef",
-            "0ff",
-            "234345"
-        };
-        runTrueFalseCases(numberFalseTests,
-                          numberTrueTests,
-                          "asHex",
-                          /*printIter*/false);
+    private static String testAsNumberWrapperEL(String number) {
+        String filtered = FilterEL.asNumber(number);
+        
+        if (filtered == null || (filtered.equals("0") && !(number.trim().equals("0")))) {
+            return null;
+        } else {
+            return number;
+        }
+    }
+
+    private static String defaultNumber = "1";
+    private static String testAsNumberWrapperDefault(String number) {
+        String filtered = Filter.asNumber(number, defaultNumber);
+        
+        if (filtered == null || (filtered.equals(defaultNumber) && !(number.trim().equals(defaultNumber)))) {
+            return null;
+        } else {
+            return number;
+        }
+    }
+
+    private static String testAsNumberWrapperELDefault(String number) {
+        String filtered = FilterEL.asNumberDefault(number, defaultNumber);
+        
+        if (filtered == null || (filtered.equals(defaultNumber) && !(number.trim().equals(defaultNumber)))) {
+            return null;
+        } else {
+            return number;
+        }
     }
 
     public void testAsNumber() {
         String[] numberFalseTests = {
+            //asNumber
             ".",
             "+65266+",
-            "-+1.266"
+            "-+1.266",
+            "65.65.",
+
+            //asHex
+            "0xefefefg",
+            "0xag",
+            "abc",
+            "\\x15"
         };
         String[] numberTrueTests = {
+            //asNumber
             "+1.425",
-            "-.04",
             "65.",
             "-64.32",
-            "42"
+            "42",
+            "-.04",
+            "0.2323232",
+
+            //asHex
+            "0xefefef",
+            "0x0ff",
+            "0x234345"
         };
+        
         runTrueFalseCases(numberFalseTests,
                           numberTrueTests,
-                          "asNumber",
+                          FilterTest.class,
+                          "testAsNumberWrapper",
+                          /*printIter*/false);
+
+        runTrueFalseCases(numberFalseTests,
+                          numberTrueTests,
+                          FilterTest.class,
+                          "testAsNumberWrapperEL",
+                          /*printIter*/false);
+
+        runTrueFalseCases(numberFalseTests,
+                          numberTrueTests,
+                          FilterTest.class,
+                          "testAsNumberWrapperDefault",
+                          /*printIter*/false);
+
+        runTrueFalseCases(numberFalseTests,
+                          numberTrueTests,
+                          FilterTest.class,
+                          "testAsNumberWrapperELDefault",
                           /*printIter*/false);
     }
 
+    private static String testAsNumberWrapperOctal(String number) {
+        String filtered = Filter.asNumber(number);
+
+        if ((filtered == null)||(filtered.trim().charAt(0) == '0' && filtered.length() > 1)) {
+            return null;
+        } else if (Integer.toString(Integer.parseInt(number)).equals(filtered)) {
+            return number;
+        } else {
+            return null;
+        }
+    }
+
+    private static String testAsNumberWrapperOctalEL(String number) {
+        String filtered = FilterEL.asNumber(number);
+        
+        if ((filtered == null)||(filtered.trim().charAt(0) == '0' && filtered.length() > 1)) {
+            return null;
+        } else if (Integer.toString(Integer.parseInt(number)).equals(filtered)) {
+            return number;
+        } else {
+            return null;
+        }
+        
+    }
+
+    public void testAsNumberOctal() {
+        String[] numberFalseTests = {
+        };
+        String[] numberTrueTests = {
+            "0777"
+        };
+        
+        runTrueFalseCases(numberFalseTests,
+                          numberTrueTests,
+                          FilterTest.class,
+                          "testAsNumberWrapperOctal",
+                          /*printIter*/false);
+
+        runTrueFalseCases(numberFalseTests,
+                          numberTrueTests,
+                          FilterTest.class,
+                          "testAsNumberWrapperOctalEL",
+                          /*printIter*/false);
+    }
+    
+	//A dodgy wrapper that we're going to use so that we can use the existing infrastructure
+	private static String testFlexibleURLWrapper(String url) {
+        String filtered = Filter.asFlexibleURL(url);
+        
+        if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
+            return null;
+        } else {
+            return url;
+        }
+    }
+
+    private static String testFlexibleURLWrapperEL(String url) {
+        String filtered = FilterEL.asFlexibleURL(url);
+        
+        if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
+            return null;
+        } else {
+            return url;
+        }
+    }
+	
+	private static String testURLWrapper(String url) {
+        String filtered = Filter.asURL(url);
+        
+        if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
+            return null;
+        } else {
+            return url;
+        }
+    }
+
+    private static String testURLWrapperEL(String url) {
+        String filtered = FilterEL.asURL(url);
+        
+        if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
+            return null;
+        } else {
+            return url;
+        }
+    }
+	
+    public void testURL() {
+        final String[] urlFalseTests = {
+            "javascript:test('http:')",
+            "\\UNC-PATH\\",
+            "data:test",
+            "about:blank",
+            "javascript\n:",
+            "vbscript:IE",
+            "data&#58boo",
+            "dat\0a:boo"
+        };
+        final String[] urlTrueTests = {
+            "\\\\UNC-PATH\\",
+            "http://host/url",
+            "//coverity.com/lo",
+            "/base/path",
+            "https://coverity.com",
+            "mailto:srl@coverity.com",
+            "ftp://coverity.com/elite.warez.tgz",
+            ""
+        };
+        
+        runTrueFalseCases(urlFalseTests,
+                          urlTrueTests,
+                          FilterTest.class,
+                          "testURLWrapper",
+                          /*printIter*/false);
+        
+        runTrueFalseCases(urlFalseTests,
+                          urlTrueTests,
+                          FilterTest.class,
+                          "testURLWrapperEL",
+                          /*printIter*/false);
+
+        //Test the blacklist implementation
+        
+        final String[] urlFlexibleFalseTests = {
+            };
+        
+        final String[] urlFlexibleTrueTests = {
+                "tel:5556667777",
+                "gopher:something something",
+                "test.html"
+            };
+        
+        runTrueFalseCases(urlFlexibleFalseTests,
+        		urlFlexibleTrueTests,
+                FilterTest.class,
+                "testFlexibleURLWrapper",
+                /*printIter*/false);
+
+        runTrueFalseCases(urlFlexibleFalseTests,
+                urlFlexibleTrueTests,
+                FilterTest.class,
+                "testFlexibleURLWrapperEL",
+                /*printIter*/false);
+        
+        runTrueFalseCases(urlFalseTests,
+                urlTrueTests,
+                FilterTest.class,
+                "testFlexibleURLWrapper",
+                /*printIter*/false);
+
+        runTrueFalseCases(urlFalseTests,
+                urlTrueTests,
+                FilterTest.class,
+                "testFlexibleURLWrapperEL",
+                /*printIter*/false);
+    }
 
     private void runTrueFalseCases(String[] falseCases,
+            String[] trueCases,
+            String testedFunction,
+            boolean printIter) {
+    	runTrueFalseCases(falseCases, trueCases, Filter.class, testedFunction, printIter);
+    	runTrueFalseCases(falseCases, trueCases, FilterEL.class, testedFunction, printIter);
+    }
+    
+    private void runTrueFalseCases(String[] falseCases,
                                    String[] trueCases,
+                                   Class testedClass,
                                    String testedFunction,
                                    boolean printIter) {
         try {
-            Method m = Filter.class.getDeclaredMethod(testedFunction, 
-                                                      new Class[] { String.class });
-            Method n = FilterEL.class.getDeclaredMethod(testedFunction, 
+            Method m = testedClass.getDeclaredMethod(testedFunction, 
                                                       new Class[] { String.class });
 
             Object nullObject = null;
@@ -155,7 +427,6 @@ public class FilterTest extends TestCase {
                 if (printIter)
                     System.out.println(testcase + " -> " + m.invoke(nullObject, new Object[] {testcase}));
                 assertTrue(m.invoke(nullObject, new Object[] {testcase}) == null);
-                assertTrue(n.invoke(nullObject, new Object[] {testcase}) == null);
             }
 
             for (int i=0; i<trueCases.length; i++) {
@@ -163,13 +434,11 @@ public class FilterTest extends TestCase {
                 if (printIter)
                     System.out.println(testcase + " -> " + m.invoke(nullObject, new Object[] {testcase}));
                 assertTrue(m.invoke(nullObject, new Object[] {testcase}) == testcase);
-                assertTrue(n.invoke(nullObject, new Object[] {testcase}) == testcase);
             }
 
             // Assert null
             String nullString = null;
             assertTrue(m.invoke(nullObject, new Object[] {nullString}) == null);
-            assertTrue(n.invoke(nullObject, new Object[] {nullString}) == null);
         }
         catch (NoSuchMethodException ex) {
             System.out.println(ex.getMessage());

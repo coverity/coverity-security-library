@@ -10,6 +10,7 @@
             <li><a href="#jsRegex"><i class="icon-chevron-right"></i> Escape.jsRegex</a></li>
             <li><a href="#uri"><i class="icon-chevron-right"></i> Escape.uri</a></li>
             <li><a href="#nested"><i class="icon-chevron-right"></i> Nested contexts</a></li>
+            <li><a href="#asURL"><i class="icon-chevron-right"></i> Filters</a></li>
         </ul>
       </div>
 
@@ -312,6 +313,119 @@ String jjString1 = Escape.jsString(Escape.jsRegex(inputNested3));
 	Note, here's what the JS engine receives:
 	<code style="background-color:#fff">var reg = new RegExp('^(<%= Escape.html(jjString1) %>)?content');</code>
 	</div>
+</section>
+
+
+<section id="asURL">
+	<div class="page-header">
+	<h1>asURL <small>com.coverity.security.FilterEL.asURL</small></h1>
+	</div>
+	<ul>
+		<li>Performs URL Filtering as EL function, inserts the result into an iframe src with HTML encoding</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;iframe src="&lt;%= Escape.html(Filter.asURL(request.getParameter("web")) %>"> k&lt;/iframe>
+</pre>
+	<h3>Result</h3>
+	<iframe src="<%= Escape.html(Filter.asURL(request.getParameter("web")) %>"> </iframe>
+</section>
+
+<section id="asFlexibleURL">
+	<div class="page-header">
+	<h1>asFlexibleURL <small>com.coverity.security.FilterEL.asFlexibleURL</small></h1>
+	</div>
+	<ul>
+		<li>Performs URL Filtering as EL function, inserts the result into an iframe src with HTML encoding</li>
+		<li>This version allows custom protocols that are not an XSS risk</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;iframe src="&lt;%= Escape.html(Filter.asFlexibleURL(request.getParameter("web")) %>"> k&lt;/iframe>
+</pre>
+	<h3>Result</h3>
+	<iframe src="<%= Escape.html(Filter.asFlexibleURL(request.getParameter("web")) %>"> </iframe>
+</section>
+
+<section id="asNumber">
+	<div class="page-header">
+	<h1>asNumber <small>com.coverity.security.FilterEL.asNumber</small></h1>
+	</div>
+	<ul>
+		<li>Performs Number Filtering as EL function, inserts the result into a javascript block, then writes the resulting number to the page</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;script>
+	var a = &lt;%= Filter.asNumber(request.getParameter("web")) %>;
+	document.write(a)
+&lt;/script>
+</pre>
+	<h3>Result</h3>
+	<script>
+		var a = <%= Filter.asNumber(request.getParameter("web")) %>;
+		document.write(a)
+	</script>
+</section>
+
+<section id="asNumber">
+	<div class="page-header">
+	<h1>asNumber <small>com.coverity.security.FilterEL.asNumber</small></h1>
+	</div>
+	<ul>
+		<li>Performs Number Filtering as EL function, inserts the result into a javascript block, then writes the resulting number to the page</li>
+		<li>asNumber takes an additional second parameter to specify a default number if 0 is not a good choice for your application</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;script>
+	var a = &lt;%= Filter.asNumber(request.getParameter("web"),"5") %>;
+	document.write(a)
+&lt;/script>
+</pre>
+	<h3>Result</h3>
+	<script>
+		var a = <%= Filter.asNumber(request.getParameter("web"),"5") %>;
+		document.write(a)
+	</script>
+</section>
+
+
+<section id="asCssColor">
+	<div class="page-header">
+	<h1>asCssColor <small>com.coverity.security.FilterEL.asCssColor</small></h1>
+	</div>
+	<ul>
+		<li>Performs Number Filtering as EL function, inserts the result into a javascript block, then writes the resulting number to the page</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;div	style="background-color: &lt;%= Filter.asCssColor(request.getParameter("web")) %>;">foreground text&lt;/div>
+</pre>
+	<h3>Result</h3>
+	<div style="background-color: <%= Filter.asCssColor(request.getParameter("web")) %>;">foreground text</div>
+</section>
+
+<section id="asCssColor">
+	<div class="page-header">
+	<h1>asCssColor <small>com.coverity.security.FilterEL.asCssColor</small></h1>
+	</div>
+	<ul>
+		<li>Performs Number Filtering as EL function, inserts the result into a javascript block, then writes the resulting number to the page</li>
+		<li>asCssColor takes an additional second parameter to specify a default color if invalid is not a good choice for your application</li>
+		<li>Testcases: GET parameter 'web'</li>
+	</ul>
+	<h3>Code</h3>
+<pre class="prettyprint linenums">
+&lt;div	style="background-color: &lt;%= Filter.asCssColor(request.getParameter("web"),"blue") %>;">foreground text&lt;/div>
+</pre>
+	<h3>Result</h3>
+	<div style="background-color: <%= Filter.asCssColor(request.getParameter("web"),"blue") %>;">foreground text</div>
 </section>
 
 	</div>
