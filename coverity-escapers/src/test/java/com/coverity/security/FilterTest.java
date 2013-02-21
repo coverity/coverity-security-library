@@ -292,8 +292,8 @@ public class FilterTest extends TestCase {
                           /*printIter*/false);
     }
     
-	//A dodgy wrapper that we're going to use so that we can use the existing infrastructure
-	private static String testFlexibleURLWrapper(String url) {
+    //A dodgy wrapper that we're going to use so that we can use the existing infrastructure
+    private static String testFlexibleURLWrapper(String url) {
         String filtered = Filter.asFlexibleURL(url);
         
         if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
@@ -312,8 +312,8 @@ public class FilterTest extends TestCase {
             return url;
         }
     }
-	
-	private static String testURLWrapper(String url) {
+    
+    private static String testURLWrapper(String url) {
         String filtered = Filter.asURL(url);
         
         if (filtered == null || (filtered.startsWith("./") && !url.startsWith("./"))) {
@@ -332,7 +332,7 @@ public class FilterTest extends TestCase {
             return url;
         }
     }
-	
+    
     public void testURL() {
         final String[] urlFalseTests = {
             "javascript:test('http:')",
@@ -379,7 +379,7 @@ public class FilterTest extends TestCase {
             };
         
         runTrueFalseCases(urlFlexibleFalseTests,
-        		urlFlexibleTrueTests,
+                urlFlexibleTrueTests,
                 FilterTest.class,
                 "testFlexibleURLWrapper",
                 /*printIter*/false);
@@ -407,8 +407,8 @@ public class FilterTest extends TestCase {
             String[] trueCases,
             String testedFunction,
             boolean printIter) {
-    	runTrueFalseCases(falseCases, trueCases, Filter.class, testedFunction, printIter);
-    	runTrueFalseCases(falseCases, trueCases, FilterEL.class, testedFunction, printIter);
+        runTrueFalseCases(falseCases, trueCases, Filter.class, testedFunction, printIter);
+        runTrueFalseCases(falseCases, trueCases, FilterEL.class, testedFunction, printIter);
     }
     
     private void runTrueFalseCases(String[] falseCases,

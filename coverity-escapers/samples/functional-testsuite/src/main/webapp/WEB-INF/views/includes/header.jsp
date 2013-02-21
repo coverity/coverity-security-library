@@ -2,11 +2,11 @@
 <!doctype html>
 <html>
 <head>
-	<title>CSL test suite - JSP</title>
-	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
-	<link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
-	
-	<style>
+    <title>CSL test suite - JSP</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet">
+    
+    <style>
 /* shamelessly copied from bootstrap website */
 body {
   position: relative;
@@ -117,7 +117,7 @@ ol.linenums li {
   line-height: 20px;
   text-shadow: 0 1px 0 #fff;
 }
-	</style>
+    </style>
 </head>
 
 <body data-spy="scroll" data-target=".bs-docs-sidebar" onload="prettyPrint()">

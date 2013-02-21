@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 
 public class Filter {
 
-	private static final Pattern OCTAL_REGEX = Pattern.compile("(0+)([0-7]*)");
+    private static final Pattern OCTAL_REGEX = Pattern.compile("(0+)([0-7]*)");
     private static final Pattern NUMBER_REGEX = Pattern.compile("[-+]?((\\.[0-9]+)|([0-9]+\\.?[0-9]*))");
     private static final Pattern HEX_REGEX = Pattern.compile("0x[0-9a-fA-F]+");
 
@@ -68,8 +68,8 @@ public class Filter {
      * leading 0s and may be interpreted as octal numbers, in which case the leading 0s
      * are stripped.
      * 
-     * @param number	the potential number to filter
-     * @return			a sanitised number or 0 if there is no conversion
+     * @param number    the potential number to filter
+     * @return            a sanitised number or 0 if there is no conversion
      */
     public static String asNumber(String number) {
         return asNumber(number, "0");
@@ -77,9 +77,9 @@ public class Filter {
     
     /**
      * Identical to asNumber, except you can provide your own default value
-     * @param number		the potential number to filter
-     * @param defaultNumber	a default String to return if the number argument is not a Number 
-     * @return				a sanitised number or defaultNumber if there is no conversion
+     * @param number        the potential number to filter
+     * @param defaultNumber    a default String to return if the number argument is not a Number 
+     * @return                a sanitised number or defaultNumber if there is no conversion
      */
     public static String asNumber(String number, String defaultNumber) {
         if (number == null)
@@ -89,7 +89,7 @@ public class Filter {
         //Do not allow octal to keep in line with java parse* functions
         Matcher octal = OCTAL_REGEX.matcher(trimNumber); 
         if (octal.matches())
-        	return octal.group(2);
+            return octal.group(2);
         
         if (NUMBER_REGEX.matcher(trimNumber).matches())
             return trimNumber;
@@ -125,8 +125,8 @@ public class Filter {
      * essentially preserve those semantics.
      * 
      * 
-     * @param color	the potential css color to filter
-     * @return		the color specified or the string "invalid"
+     * @param color    the potential css color to filter
+     * @return        the color specified or the string "invalid"
      */
     public static String asCssColor(String color) {
         return asCssColor(color, "invalid");
@@ -134,9 +134,9 @@ public class Filter {
     
     /**
      * Identical to asCssColor, except you can provide your own default value
-     * @param number		the potential css color to filter
-     * @param defaultColor	a default String to return if the color argument is not a potentially valid CSS color 
-     * @return				a sanitised color or defaultColor if there is no conversion
+     * @param number        the potential css color to filter
+     * @param defaultColor    a default String to return if the color argument is not a potentially valid CSS color 
+     * @return                a sanitised color or defaultColor if there is no conversion
      */
     public static String asCssColor(String color, String defaultColor) {
         if (color == null)
@@ -186,8 +186,8 @@ public class Filter {
      * </ul>
      * 
      * 
-     * @param url	The potentially tainted URL to be Filtered
-     * @return		a safe version of the URL or <code>null</code> if <code>input</code> is null
+     * @param url    The potentially tainted URL to be Filtered
+     * @return        a safe version of the URL or <code>null</code> if <code>input</code> is null
      */
     public static String asURL(String url) {
         if (url == null) {
@@ -199,7 +199,7 @@ public class Filter {
         }
 
         if (URL_REGEX.matcher(url).matches()) {
-        	return url;
+            return url;
         }
 
         //Our fallback is to transform this to a relative URL
@@ -218,8 +218,8 @@ public class Filter {
      * The complexity of this function is necessary due to the parsing that browsers do when
      * they encounter URLs, e.g. stripping new lines and NUL bytes. 
      * 
-     * @param url	The potentially tainted URL to be Filtered
-     * @return		a safe version of the URL or <code>null</code> if <code>input</code> is null
+     * @param url    The potentially tainted URL to be Filtered
+     * @return        a safe version of the URL or <code>null</code> if <code>input</code> is null
      */
     public static String asFlexibleURL(String url) {
         if (url == null) {
@@ -232,39 +232,39 @@ public class Filter {
         //Assumption: / is not an escape character in any context
         //Note: this allows scheme-relative URLs e.g. //google.com/
         if (url.startsWith("/")) {
-        	return url;
+            return url;
         }
         
         //Allow UNC paths
         if (url.startsWith("\\\\")) {
-        	return url;
+            return url;
         }
         
         //Find a potential scheme name
         for (; i < length; i++) {
-        	char c = url.charAt(i);
-        	//These are valid scheme characters from RFC 3986
-        	//Assumption: These are not escape characters in any context
-        	if (! (
-        			(c >= 'a' && c <='z') || (c >= 'A' && c <='Z') ||
-        			(c >= '0' && c <='9') || (c == '.') || (c == '+')
-        			 || (c == '-')
-        			)) {
-        		break;
-        	}
+            char c = url.charAt(i);
+            //These are valid scheme characters from RFC 3986
+            //Assumption: These are not escape characters in any context
+            if (! (
+                    (c >= 'a' && c <='z') || (c >= 'A' && c <='Z') ||
+                    (c >= '0' && c <='9') || (c == '.') || (c == '+')
+                     || (c == '-')
+                    )) {
+                break;
+            }
         }
         
         //i == first non-scheme value
         
         if (i == length) {
-        	//The whole string is consists only of a-z A-Z 0-9 .+-
-        	return url;
+            //The whole string is consists only of a-z A-Z 0-9 .+-
+            return url;
         }
         
         if (url.charAt(i) == ':' && validateScheme(url.substring(0,i))) {
-        	//We've extracted what we think is a scheme, confirmed it definitely is a scheme
-        	//then confirmed the scheme is safe, return the original string
-       		return url;
+            //We've extracted what we think is a scheme, confirmed it definitely is a scheme
+            //then confirmed the scheme is safe, return the original string
+               return url;
         }
 
         //Our fallback is to transform this to a relative URL
@@ -274,7 +274,7 @@ public class Filter {
     private static final Pattern SCHEME_REGEX = Pattern.compile("(javascript|vbscript|data|about)");
     
     private static boolean validateScheme(String scheme) {
-    	return !SCHEME_REGEX.matcher(scheme).matches();
+        return !SCHEME_REGEX.matcher(scheme).matches();
     }
 
 

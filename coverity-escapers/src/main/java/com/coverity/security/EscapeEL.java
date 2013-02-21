@@ -55,9 +55,9 @@ public class EscapeEL {
     /**
      * EL wrapper for {@link Escape#html(String)}
      */
-	public static String htmlEscape(String input) {
-		return Escape.html(input);
-	}
+    public static String htmlEscape(String input) {
+        return Escape.html(input);
+    }
 
     /**
      * EL wrapper for {@link Escape#htmlText(String)}, equivalent to <code>fn:escapeXml</code>.
@@ -69,9 +69,9 @@ public class EscapeEL {
     /**
      * EL wrapper for {@link Escape#uriParam(String)}
      */
-	public static String uriParamEncode(String input) {
-		return Escape.uriParam(input);
-	}
+    public static String uriParamEncode(String input) {
+        return Escape.uriParam(input);
+    }
 
     /**
      * EL wrapper for {@link Escape#uri(String)}
@@ -83,21 +83,21 @@ public class EscapeEL {
     /**
      * EL wrapper for {@link Escape#jsString(String)}
      */
-	public static String jsStringEscape(String input) {
-		return Escape.jsString(input);
-	}
+    public static String jsStringEscape(String input) {
+        return Escape.jsString(input);
+    }
 
     /**
      * EL wrapper for {@link Escape#jsRegex(String)}
      */
-	public static String jsRegexEscape(String input) {
-		return Escape.jsRegex(input);
-	}
+    public static String jsRegexEscape(String input) {
+        return Escape.jsRegex(input);
+    }
 
     /**
      * EL wrapper for {@link Escape#cssString(String)}
      */
-	public static String cssStringEscape(String input) {
-		return Escape.cssString(input);
-	}
+    public static String cssStringEscape(String input) {
+        return Escape.cssString(input);
+    }
 }
