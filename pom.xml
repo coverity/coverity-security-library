@@ -6,7 +6,7 @@
     <groupId>com.coverity.security</groupId>
     <artifactId>coverity-security-library</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <name>coverity-security-library</name>
     <description>Open source security library from Coverity</description>
     <url>http://coverity.com/security</url>
@@ -86,5 +86,30 @@
             </plugin>
         </plugins>
     </build>
-
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
