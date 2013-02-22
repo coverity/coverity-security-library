@@ -94,7 +94,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
         
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -183,7 +183,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
         
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -260,7 +260,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
 
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -392,6 +392,9 @@ public class Escape {
      *                       <code>\ (U+005C)</code> 
      * </li>
      * <li>
+     * URI encoding characters: <code>% (U+0025)</code>
+     * </li>
+     * <li>
      * HTML characters: <code>/ (U+002F)</code>,
      *                  <code>&lt; (U+003C)</code>, <code>&gt; (U+003E)</code>, 
      *                  <code>&amp; (U+0026)</code>
@@ -415,7 +418,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
         
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -448,6 +451,10 @@ public class Escape {
                 break;
             case '\\':
                 output.append("\\u005C");
+                break;
+            // URI encoding char
+            case '%':
+                output.append("\\u0025");
                 break;
             // HTML chars for closing the parent context
             case '&':
@@ -529,7 +536,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
 
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -654,7 +661,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
 
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -768,7 +775,7 @@ public class Escape {
             return null;
 
         int length = input.length();
-        StringBuilder output = allocateStringBuilder(input, length);
+        StringBuilder output = allocateStringBuilder(length);
 
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);
@@ -782,10 +789,9 @@ public class Escape {
 
 
     /**
-     * Compute the allocation size of the StringBuilder based on the input and its
-     * length.
+     * Compute the allocation size of the StringBuilder based on the length.
      */
-    private static StringBuilder allocateStringBuilder(String input, int length) {
+    private static StringBuilder allocateStringBuilder(int length) {
         // Allocate enough temporary buffer space to avoid reallocation in most
         // cases. If you believe you will output large amount of data at once
         // you might need to change the factor.

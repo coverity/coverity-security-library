@@ -55,4 +55,42 @@
         <function-signature>java.lang.String cssStringEscape(java.lang.String)</function-signature>
     </function>
     
+
+    <!-- Filters -->
+    <function>
+        <name>asURL</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asURL(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asFlexibleURL</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asFlexibleURL(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asNumber</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asNumber(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>asNumberDefault</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asNumberDefault(java.lang.String,java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asCssColor</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssColor(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>asCssColorDefault</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssColorDefault(java.lang.String,java.lang.String)</function-signature>
+    </function>
+
 </taglib>

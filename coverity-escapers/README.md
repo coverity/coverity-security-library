@@ -21,16 +21,16 @@ use them! Just make sure you use them correctly :)
 3. [HTML Contexts Examples](#main_contexts)
 4. [Authors & License](#main_authors)
 
-# <a id="install"></a>Installation
+# <a id="install" name="install"></a>Installation
 
 ## Using Maven
 To include this library into your Maven project, add the following to your pom:
 
 ```xml
 <dependency>
-    <groupId>com.coverity</groupId>
+    <groupId>com.coverity.security</groupId>
     <artifactId>coverity-escapers</artifactId>
-    <version>1.0.0</version>
+    <version>1.0</version>
 </dependency>
 ```
 
@@ -56,7 +56,7 @@ The javadoc can be created directly from the Maven build:
     $ mvn install
     $ open ./coverity-escapers/target/apidocs/index.html
 
-# <a id="main_usage"></a> Usage
+# <a id="main_usage" name="main_usage"></a> Usage
 
 ## Example 1: XSS Defect in Java Servlet
 
@@ -146,7 +146,7 @@ ensure values are properly escaped for the HTML attribute value context.
 Note that if you want to limit the number of EL functions imported, you can use the 
 `cov:htmlEscape` function instead of `fn:escapeXml`.
 
-# <a id="main_contexts"></a> Background Information
+# <a id="main_contexts" name="main_contexts"></a> Background Information
 
 ## Contexts
 
@@ -287,7 +287,7 @@ Injection examples:
 ```html
 <style>
     #clickme a {
-      background-image: url('TAINTED_DATA_HERE');
+      background-image: url('/pull-image/?id=TAINTED_DATA_HERE');
     }
 </style>
 <a id="clickme" href="http://www.example.com/?test=TAINTED_DATA_HERE">Click me!</a>
@@ -342,7 +342,7 @@ unquoted values in HTML or CSS. Rather, use the double or single quoted values. 
 is that unquoted values make it even more difficult to mitigate and are sometimes
 web browser specific.
 
-# <a id="main_authors"></a> Authors
+# <a id="main_authors" name="main_authors"></a> Authors
 The Escape library was developed by the [Coverity Security Research Lab](http://www.coverity.com) members:
 * Romain Gaucher, [@rgaucher](https://twitter.com/rgaucher)
 * Andy Chou, [@_achou](https://twitter.com/_achou)

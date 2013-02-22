@@ -18,13 +18,16 @@ Users of Coverity Security Advisor get remediation guidance based on escaping ro
 
 The [Escape class](https://github.com/coverity/coverity-security-library/tree/develop/coverity-escapers) contains several escapers for web content. These escaping functions help remedy common defects (mostly cross-site scripting) that occur when the data is inserted into HTML element, HTML attribute values, URI, JavaScript strings, SQL LIKE clauses, etc. More information are available in the [Escape directory](https://github.com/coverity/coverity-security-library/tree/develop/coverity-escapers).
 
-Before using any of these methods, you should understand the context (or nested contexts) in which the data is inserted. [Several examples](https://github.com/coverity/coverity-security-library/tree/develop/coverity-escapers/samples) are available in the repository, and more will be available on [our blog](https://communities.coverity.com/blogs/security).
+Before using any of these methods, you should understand the context (or nested contexts) in which the data is inserted. [Several mockup examples with explanation](https://github.com/coverity/coverity-security-library/tree/develop/coverity-escapers/samples/mockup-examples) are available in the repository, and more will be available on [our blog](https://communities.coverity.com/blogs/security). 
+If you want to test the library to understand how it whistands security attacks, our [functional testsuite](https://github.com/coverity/coverity-security-library/tree/develop/coverity-escapers/samples/functional-testsuite) is the right app to build/deploy/test.
+
+Ready to use it? One last step is to have a look at [the latest javadoc](http://coverity.github.com/coverity-security-library) directly on github.
 
 To include this library into your Maven project, add the following:
 
 ```xml
 <dependency>
-    <groupId>com.coverity</groupId>
+    <groupId>com.coverity.security</groupId>
     <artifactId>coverity-escapers</artifactId>
     <version>1.0</version>
 </dependency>
