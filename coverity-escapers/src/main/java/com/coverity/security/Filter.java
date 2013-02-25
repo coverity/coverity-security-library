@@ -68,6 +68,7 @@ public class Filter {
      * 
      * @param number    the potential number to filter
      * @return            a sanitised number or 0 if there is no conversion
+     * @since  1.1
      */
     public static String asNumber(String number) {
         return asNumber(number, "0");
@@ -104,7 +105,7 @@ public class Filter {
      * asCssColor is useful when you need to insert dynamic data into a CSS color context, e.g.
      * &lt;style>
      * .userprofile {
-     * background-colo: ${cov:asCssColor(param.web)};
+     * background-color: ${cov:asCssColor(param.web)};
      * }
      * &lt;/style> 
      * 
