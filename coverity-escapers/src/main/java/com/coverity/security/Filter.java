@@ -1,5 +1,5 @@
 /**
- *   Copyright (c) 2012, Coverity, Inc. 
+ *   Copyright (c) 2013, Coverity, Inc. 
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without modification, 
@@ -26,6 +26,9 @@
  */
 package com.coverity.security;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Filter is a small set of methods for filtering tainted data that cannot be escaped. These
  * methods may change the semantics of the data if it cannot be determined to be safe, however
@@ -46,11 +49,6 @@ package com.coverity.security;
  * @author Alex Kouzemtchenko
  * @author Romain Gaucher
  */
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
 public class Filter {
 
     private static final Pattern OCTAL_REGEX = Pattern.compile("(0+)([0-7]*)");
@@ -80,6 +78,7 @@ public class Filter {
      * @param number        the potential number to filter
      * @param defaultNumber    a default String to return if the number argument is not a Number 
      * @return                a sanitised number or defaultNumber if there is no conversion
+     * @since  1.1
      */
     public static String asNumber(String number, String defaultNumber) {
         if (number == null)
@@ -127,6 +126,7 @@ public class Filter {
      * 
      * @param color    the potential css color to filter
      * @return        the color specified or the string "invalid"
+     * @since  1.1
      */
     public static String asCssColor(String color) {
         return asCssColor(color, "invalid");
@@ -137,6 +137,7 @@ public class Filter {
      * @param color           the potential css color to filter
      * @param defaultColor    a default String to return if the color argument is not a potentially valid CSS color 
      * @return                a sanitised color or defaultColor if there is no conversion
+     * @since  1.1
      */
     public static String asCssColor(String color, String defaultColor) {
         if (color == null)
@@ -188,6 +189,7 @@ public class Filter {
      * 
      * @param url    The potentially tainted URL to be Filtered
      * @return        a safe version of the URL or <code>null</code> if <code>input</code> is null
+     * @since  1.1
      */
     public static String asURL(String url) {
         if (url == null) {
@@ -220,6 +222,7 @@ public class Filter {
      * 
      * @param url    The potentially tainted URL to be Filtered
      * @return        a safe version of the URL or <code>null</code> if <code>input</code> is null
+     * @since  1.1
      */
     public static String asFlexibleURL(String url) {
         if (url == null) {

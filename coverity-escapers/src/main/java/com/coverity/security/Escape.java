@@ -1,5 +1,5 @@
 /**
- *   Copyright (c) 2012, Coverity, Inc. 
+ *   Copyright (c) 2012-2013, Coverity, Inc. 
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without modification, 
@@ -48,6 +48,7 @@ package com.coverity.security;
  * @author Romain Gaucher
  * @author Andy Chou
  * @author Jon Passki
+ * @author Alex Kouzemtchenko
  * 
  */
 public class Escape {
