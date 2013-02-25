@@ -271,7 +271,7 @@ public class Filter {
         return "./" + url;
     }
     
-    private static final Pattern SCHEME_REGEX = Pattern.compile("(javascript|vbscript|data|about)");
+    private static final Pattern SCHEME_REGEX = Pattern.compile("(javascript|vbscript|data|about)", Pattern.CASE_INSENSITIVE);
     
     private static boolean validateScheme(String scheme) {
         return !SCHEME_REGEX.matcher(scheme).matches();

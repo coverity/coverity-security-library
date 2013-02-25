@@ -336,6 +336,7 @@ public class FilterTest extends TestCase {
     public void testURL() {
         final String[] urlFalseTests = {
             "javascript:test('http:')",
+            "jaVascRipt:test",
             "\\UNC-PATH\\",
             "data:test",
             "about:blank",
