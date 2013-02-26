@@ -151,7 +151,7 @@ public class Filter {
         return defaultColor;
     }
     
-    private static final Pattern URL_REGEX = Pattern.compile("(/|\\\\\\\\|https?:|ftp:|mailto:).*");
+    private static final Pattern URL_REGEX = Pattern.compile("(/|\\\\\\\\|https?:|ftp:|mailto:).*", Pattern.CASE_INSENSITIVE);
     /**
      * URL filtering to ensure that the URL is a safe non-relative URL or transforms it to a safe relative URL.
      * <p>
