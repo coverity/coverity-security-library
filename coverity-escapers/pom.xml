@@ -6,7 +6,7 @@
     <groupId>com.coverity.security</groupId>
     <artifactId>coverity-escapers</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.1</version>
+    <version>1.2-SNAPSHOT</version>
     <name>coverity-escapers</name>
     <description>Open source library of HTML, JavaScript, and CSS escapers for use by Java applications</description>
     <url>http://coverity.com/security</url>
@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.coverity.security</groupId>
         <artifactId>coverity-security-library</artifactId>
-        <version>1.1.1</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
 
     <licenses>

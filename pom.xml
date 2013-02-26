@@ -6,7 +6,7 @@
     <groupId>com.coverity.security</groupId>
     <artifactId>coverity-security-library</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.1</version>
+    <version>1.2-SNAPSHOT</version>
     <name>coverity-security-library</name>
     <description>Open source security library from Coverity</description>
     <url>http://coverity.com/security</url>
