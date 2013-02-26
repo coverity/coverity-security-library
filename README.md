@@ -29,7 +29,7 @@ To include this library into your Maven project, add the following:
 <dependency>
     <groupId>com.coverity.security</groupId>
     <artifactId>coverity-escapers</artifactId>
-    <version>1.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 

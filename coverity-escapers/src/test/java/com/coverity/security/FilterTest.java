@@ -336,6 +336,7 @@ public class FilterTest extends TestCase {
     public void testURL() {
         final String[] urlFalseTests = {
             "javascript:test('http:')",
+            "jaVascRipt:test",
             "\\UNC-PATH\\",
             "data:test",
             "about:blank",
@@ -347,10 +348,12 @@ public class FilterTest extends TestCase {
         final String[] urlTrueTests = {
             "\\\\UNC-PATH\\",
             "http://host/url",
+            "hTTp://host/url",
             "//coverity.com/lo",
             "/base/path",
             "https://coverity.com",
             "mailto:srl@coverity.com",
+            "maiLto:srl@coverity.com",
             "ftp://coverity.com/elite.warez.tgz",
             ""
         };
