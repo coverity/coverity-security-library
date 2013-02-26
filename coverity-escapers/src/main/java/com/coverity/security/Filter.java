@@ -265,7 +265,7 @@ public class Filter {
             return url;
         }
         
-        if (url.charAt(i) == ':' && validateScheme(url.substring(0,i))) {
+        if (url.charAt(i) == ':' && validateScheme(url.substring(0,i).toLowerCase())) {
             //We've extracted what we think is a scheme, confirmed it definitely is a scheme
             //then confirmed the scheme is safe, return the original string
                return url;
@@ -275,7 +275,7 @@ public class Filter {
         return "./" + url;
     }
     
-    private static final Pattern SCHEME_REGEX = Pattern.compile("(javascript|vbscript|data|about)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SCHEME_REGEX = Pattern.compile("(javascript|vbscript|data|about)");
     
     private static boolean validateScheme(String scheme) {
         return !SCHEME_REGEX.matcher(scheme).matches();
