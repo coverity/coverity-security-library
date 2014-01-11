@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/coverity/coverity-security-library.png?branch=develop)](https://travis-ci.org/coverity/coverity-security-library)
+
 # Coverity Security Library
 The Coverity Security Library (CSL) is a lightweight set of escaping routines for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.
 
