@@ -4,3 +4,5 @@ trunk
 run-analysis.sh
 README.html
 *.versionsBackup
+.idea/
+*.iml

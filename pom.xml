@@ -59,6 +59,7 @@
 
     <modules>
         <module>coverity-escapers</module>
+        <module>coverity-templates</module>
     </modules>
 
     <build>
