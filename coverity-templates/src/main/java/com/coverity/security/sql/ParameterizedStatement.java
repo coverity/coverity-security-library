@@ -70,8 +70,10 @@ public class ParameterizedStatement {
      * Creates a ParameterizedStatement instance using the supplied template string. The template string should be a
      * valid PreparedStatement query string (i.e. with "?" placeholder values), with the addition of named parameters
      * which represent placeholders for SQL identifiers. Named parameters are represented by a colon ":" followed by
-     * one or more alphanumeric characters, i.e. ":fooBar1234". Named parameters may be repeated, in which case all
-     * such parameters will use the same identifier value.
+     * one or more alphanumeric characters, i.e. ":fooBar1234". Other characters (such as punctuation, hyphens, and
+     * underscores) are not allowed in parameter names and will be interpreted as the end of the end of the identifier
+     * (e.g. in "SELECT :foo-10" would be syntatically equivalent to "SELECT :foo - 10"). Named parameters may be
+     * repeated, in which case all such parameters will use the same identifier value.
      *
      * For example, you can parameterize the schema name with:
      *
