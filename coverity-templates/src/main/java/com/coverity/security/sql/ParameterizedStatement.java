@@ -90,6 +90,7 @@ public class ParameterizedStatement {
      * relevant metadata from the connection.
      */
     public static ParameterizedStatement prepare(Connection connection, String sql) throws SQLException {
+        // TODO: Do proper tokenizing and parsing instead of regex matching
         final Matcher matcher = PARSER_PATTERN.matcher(sql);
         int start = 0;
         final List<String> sqlPieces = new ArrayList<String>();

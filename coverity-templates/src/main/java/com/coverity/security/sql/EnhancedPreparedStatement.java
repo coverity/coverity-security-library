@@ -75,6 +75,7 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
      * identifier strings) from the JDBC connection.
      */
     public static EnhancedPreparedStatement prepareStatement(Connection conn, String sql) throws SQLException {
+        // TODO: Do proper tokenizing and parsing instead of regex matching
         EnhancedPreparedStatement result = new EnhancedPreparedStatement(conn, sql.split("\\?", -1));
         return result;
     }
