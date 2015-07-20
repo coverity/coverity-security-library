@@ -90,6 +90,27 @@ class EnhancedNamedQuery extends EnhancedQuery {
     }
 
     @Override
+    public EnhancedQuery setIdentifiers(int position, String[] values) {
+        throw new IllegalArgumentException("Named parameter expected.");
+    }
+
+    @Override
+    public EnhancedQuery setIdentifiers(String name, String[] values) {
+        if (values.length == 0) {
+            throw new IllegalArgumentException("Identifiers list cannot be empty.");
+        }
+        StringBuilder sb = new StringBuilder();
+        validateIdentifier(values[0]);
+        sb.append(values[0]);
+        for (int i = 1; i < values.length; i++) {
+            validateIdentifier(values[i]);
+            sb.append(", ").append(values[i]);
+        }
+        identifiers.put(name, sb.toString());
+        return this;
+    }
+
+    @Override
     public Query setParameter(Parameter<Date> param, Date value, TemporalType temporalType) {
         String name = param.getName();
         if (name == null) {

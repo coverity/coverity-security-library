@@ -5,8 +5,8 @@ import com.coverity.security.sql.test.MockConnection;
 import com.coverity.security.sql.test.MockPreparedStatement;
 import org.testng.annotations.Test;
 
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -172,6 +172,34 @@ public class EnhancedPreparedStatementTest {
         stmt.setInt(2, 101);
         stmt.execute();
 
+    }
+
+    @Test
+    public void testSetIdentifiers() throws SQLException {
+        MockConnection connection = new MockConnection("`", "#@");
+
+        EnhancedPreparedStatement stmt = EnhancedPreparedStatement.prepareStatement(connection, "SELECT ? FROM foo");
+
+        boolean exception = false;
+        try {
+            stmt.setIdentifiers(1, new String[0]);
+        } catch (Exception e) {
+            exception = true;
+            assertEquals(e.getClass(), IllegalArgumentException.class);
+        }
+        assertTrue(exception);
+
+        stmt.setIdentifiers(1, new String[] {"a", "b", "c"});
+        stmt.execute();
+
+        MockPreparedStatement mockStmt = connection.getMockStatements().get(0);
+        assertEquals(mockStmt.getSql(), "SELECT `a`, `b`, `c` FROM foo");
+
+        stmt.setIdentifiers(1, Arrays.asList("a", "b", "c"));
+        stmt.execute();
+
+        mockStmt = connection.getMockStatements().get(1);
+        assertEquals(mockStmt.getSql(), "SELECT `a`, `b`, `c` FROM foo");
     }
 
 }

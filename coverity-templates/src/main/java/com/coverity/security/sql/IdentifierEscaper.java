@@ -19,12 +19,18 @@ class IdentifierEscaper {
         extraNameChars = dbMetaData.getExtraNameCharacters().toCharArray();
     }
 
-    public String escapeIdentifier(final String identifier) {
+    /**
+     * Validates that the identifier is legal according to the underlying JDBC implementation. Throws an
+     * IllegalArgumentException if not.
+     *
+     * @param identifier The identifier to be validated.
+     */
+    public void validateIdentifier(final String identifier) {
         if (identifierQuoteString != null) {
             if (identifier.contains(identifierQuoteString)) {
                 throw new IllegalArgumentException("Identifier cannot contain quote string: " + identifierQuoteString);
             }
-            return identifierQuoteString + identifier + identifierQuoteString;
+            return;
         } else {
             final char[] identifierChars = identifier.toCharArray();
             for (int i = 0; i < identifierChars.length; i++) {
@@ -46,6 +52,21 @@ class IdentifierEscaper {
                     }
                 }
             }
+            return;
+        }
+    }
+
+    /**
+     * Returns an appropriate escaped/quoted version of the identifier. Assumes that the identifier has already
+     * been validated, i.e. by passing it to the validateIdentifier method.
+     *
+     * @param identifier The identifier to be escaped.
+     * @return The escaped version of the identifier.
+     */
+    public String escapeIdentifier(final String identifier) {
+        if (identifierQuoteString != null) {
+            return identifierQuoteString + identifier + identifierQuoteString;
+        } else {
             return identifier;
         }
     }

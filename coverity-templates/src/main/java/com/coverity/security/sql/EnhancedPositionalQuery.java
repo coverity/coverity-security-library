@@ -87,6 +87,27 @@ class EnhancedPositionalQuery extends EnhancedQuery {
     }
 
     @Override
+    public EnhancedQuery setIdentifiers(int position, String[] values) {
+        if (values.length == 0) {
+            throw new IllegalArgumentException("Identifiers list cannot be empty.");
+        }
+        StringBuilder sb = new StringBuilder();
+        validateIdentifier(values[0]);
+        sb.append(values[0]);
+        for (int i = 1; i < values.length; i++) {
+            validateIdentifier(values[i]);
+            sb.append(", ").append(values[i]);
+        }
+        identifiers[position-1] = sb.toString();
+        return this;
+    }
+
+    @Override
+    public EnhancedQuery setIdentifiers(String name, String[] values) {
+        throw new IllegalArgumentException("Positional parameter expected.");
+    }
+
+    @Override
     public Query setParameter(Parameter<Date> param, Date value, TemporalType temporalType) {
         Integer position = param.getPosition();
         if (position == null) {

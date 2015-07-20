@@ -95,6 +95,18 @@ public abstract class EnhancedQuery implements Query {
 
     public abstract EnhancedQuery setIdentifier(String name, String value);
 
+    public abstract EnhancedQuery setIdentifiers(int position, String[] values);
+
+    public abstract EnhancedQuery setIdentifiers(String name, String[] values);
+
+    public EnhancedQuery setIdentifiers(int position, Collection<String> values) {
+        return setIdentifiers(position, values.toArray(new String[values.size()]));
+    }
+
+    public EnhancedQuery setIdentifiers(String name, Collection<String> values) {
+        return setIdentifiers(name, values.toArray(new String[values.size()]));
+    }
+
     private Query prepareQuery() {
         Query query = buildQuery(entityManager, isNative);
         query.setMaxResults(maxResults);

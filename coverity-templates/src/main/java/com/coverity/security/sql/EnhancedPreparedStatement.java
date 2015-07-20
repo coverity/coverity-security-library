@@ -1,6 +1,7 @@
 package com.coverity.security.sql;
 
 import java.sql.*;
+import java.util.Collection;
 
 /**
  * A drop-in replacement for PreparedStatements which allows for SQL identifiers to be parameterized. For example, the
@@ -85,7 +86,7 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
 
         for (int i = 0; i < queryParts.length-1; i++) {
             if (identifiers[i] != null) {
-                sb.append(identifierEscaper.escapeIdentifier(identifiers[i]));
+                sb.append(identifiers[i]);
             } else {
                 sb.append('?');
             }
@@ -121,7 +122,43 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
      * @param identifier The identifier. This string should not be quoted.
      */
     public void setIdentifier(int parameterIndex, String identifier) {
-        identifiers[parameterIndex - 1] = identifier;
+        identifierEscaper.validateIdentifier(identifier);
+        identifiers[parameterIndex - 1] = identifierEscaper.escapeIdentifier(identifier);
+    }
+
+    /**
+     * Sets the parameter to use the provided identifiers as a comma-separated list. If any identifier is invalid
+     * (either because it is not a valid identifier in the database's schema, or because it contains invalid
+     * characters), an IllegalArgumentException will be thrown.
+     *
+     * @param parameterIndex The index of the "?" placeholder to which this identifier applies, number from 1.
+     * @param identifiers The identifiers. These strings should not be quoted.
+     */
+    public void setIdentifiers(int parameterIndex, String[] identifiers) {
+        if (identifiers.length == 0) {
+            throw new IllegalArgumentException("Identifier list cannot be empty.");
+        }
+        identifierEscaper.validateIdentifier(identifiers[0]);
+        final StringBuilder sb = new StringBuilder().append(identifierEscaper.escapeIdentifier(identifiers[0]));
+        for (int i = 1; i < identifiers.length; i++) {
+            identifierEscaper.validateIdentifier(identifiers[i]);
+            sb.append(", ").append(identifierEscaper.escapeIdentifier(identifiers[i]));
+        }
+        this.identifiers[parameterIndex - 1] = sb.toString();
+    }
+
+    /**
+     * Sets the parameter to use the provided identifiers as a comma-separated list. If any identifier is invalid
+     * (either because it is not a valid identifier in the database's schema, or because it contains invalid
+     * characters), an IllegalArgumentException will be thrown.
+     *
+     * This is a convenience method, which is equivalent to calling setIdentifiers(parameterIndex, identifiers.toArray(new String[0]));
+     *
+     * @param parameterIndex The index of the "?" placeholder to which this identifier applies, number from 1.
+     * @param identifiers The identifiers. These strings should not be quoted.
+     */
+    public void setIdentifiers(int parameterIndex, Collection<String> identifiers) {
+        setIdentifiers(parameterIndex, identifiers.toArray(new String[identifiers.size()]));
     }
 
     @Override

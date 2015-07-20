@@ -3,10 +3,7 @@ package com.coverity.security.sql;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -115,13 +112,50 @@ public class ParameterizedStatement {
      * @param parameterName The name of the identifier placeholder from the template string (without the leading colon).
      * @param parameterValue The value of the identifier to use in the query. If this identifier is invalid (either
      *                       because it is not a valid identifier in the database schema or because it contains an
-     *                       invalid character), no exeception will be thrown until the prepareStatement() method is
-     *                       called.
+     *                       invalid character), an IllegalArgumentException will be thrown.
      * @return This object; useful for chaining calls to this object's methods.
      */
     public ParameterizedStatement setIdentifier(String parameterName, String parameterValue) {
-        parameterValues.put(parameterName, parameterValue);
+        identifierEscaper.validateIdentifier(parameterValue);
+        parameterValues.put(parameterName, identifierEscaper.escapeIdentifier(parameterValue));
         return this;
+    }
+
+    /**
+     * Sets the parameter on the query string as a comma-separated list of identifiers.
+     *
+     * @param parameterName The name of the identifier placeholder from the template string (without the leading colon).
+     * @param paramValues The array value of the identifier values to be used in the query. If any identifier is
+     *                       invalid (either because it is not a valid identifier in the database schema or because it
+     *                       contains an invalid character), an IllegalArgumentException will be thrown.
+     * @return This object; useful for chaining calls to this object's methods.
+     */
+    public ParameterizedStatement setIdentifiers(String parameterName, String[] paramValues) {
+        if (paramValues.length == 0) {
+            throw new IllegalArgumentException("Identifier list cannot be empty.");
+        }
+        identifierEscaper.validateIdentifier(paramValues[0]);
+        final StringBuilder sb = new StringBuilder().append(identifierEscaper.escapeIdentifier(paramValues[0]));
+        for (int i = 1; i < paramValues.length; i++) {
+            identifierEscaper.validateIdentifier(paramValues[i]);
+            sb.append(", ").append(identifierEscaper.escapeIdentifier(paramValues[i]));
+        }
+        parameterValues.put(parameterName, sb.toString());
+        return this;
+    }
+
+    /**
+     * Sets the parameter on the query string as a comma-separated list of identifiers. This is a convenience method;
+     * it is equivalent to calling setIdentifiers(parameterName, paramValues.toArray(new String[0]));
+     *
+     * @param parameterName The name of the identifier placeholder from the template string (without the leading colon).
+     * @param paramValues The collection of identifier values to be used in the query. If any identifier is
+     *                       invalid (either because it is not a valid identifier in the database schema or because it
+     *                       contains an invalid character), an IllegalArgumentException will be thrown.
+     * @return This object; useful for chaining calls to this object's methods.
+     */
+    public ParameterizedStatement setIdentifiers(String parameterName, Collection<String> paramValues) {
+        return setIdentifiers(parameterName, paramValues.toArray(new String[paramValues.size()]));
     }
 
     /**
@@ -141,7 +175,7 @@ public class ParameterizedStatement {
                 throw new SQLException("Unset parameter: " + parameters[i]);
             }
             final String paramValue = parameterValues.get(parameters[i]);
-            sb.append(sqlPieces[i]).append(identifierEscaper.escapeIdentifier(paramValue));
+            sb.append(sqlPieces[i]).append(paramValue);
         }
         for (int i = parameters.length; i < sqlPieces.length; i++) {
             sb.append(sqlPieces[i]);

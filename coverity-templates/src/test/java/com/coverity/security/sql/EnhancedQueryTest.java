@@ -184,23 +184,23 @@ public class EnhancedQueryTest {
 
     @DataProvider
     public Object[][] identifierTests() {
-        return new Object[][] {
+        return new Object[][]{
                 // isNative, SQL, identifier, expected result (null => exception)
-                { true, "SELECT * FROM ?1", "foo_bar", "SELECT * FROM foo_bar" },
-                { true, "SELECT * FROM ?1", "foo12_21bar", "SELECT * FROM foo12_21bar" },
-                { true, "SELECT * FROM ?1", "foo12_21bar!", null },
-                { true, "SELECT * FROM ?1", "!foo", null },
-                { true, "SELECT * FROM ?1", "", null },
-                { true, "SELECT * FROM ?1", null, null },
+                {true, "SELECT * FROM ?1", "foo_bar", "SELECT * FROM foo_bar"},
+                {true, "SELECT * FROM ?1", "foo12_21bar", "SELECT * FROM foo12_21bar"},
+                {true, "SELECT * FROM ?1", "foo12_21bar!", null},
+                {true, "SELECT * FROM ?1", "!foo", null},
+                {true, "SELECT * FROM ?1", "", null},
+                {true, "SELECT * FROM ?1", null, null},
 
-                { false, "FROM ?1", "foo_bar", "FROM foo_bar" },
-                { false, "FROM ?1", "foo12_21bar", "FROM foo12_21bar" },
-                { false, "FROM ?1", "foo12_21bar!", null },
-                { false, "FROM ?1", "!foo", null },
-                { false, "FROM ?1", "12foo", null },
-                { false, "FROM ?1", "foo12", "FROM foo12" },
-                { false, "FROM ?1", "", null },
-                { false, "FROM ?1", null, null },
+                {false, "FROM ?1", "foo_bar", "FROM foo_bar"},
+                {false, "FROM ?1", "foo12_21bar", "FROM foo12_21bar"},
+                {false, "FROM ?1", "foo12_21bar!", null},
+                {false, "FROM ?1", "!foo", null},
+                {false, "FROM ?1", "12foo", null},
+                {false, "FROM ?1", "foo12", "FROM foo12"},
+                {false, "FROM ?1", "", null},
+                {false, "FROM ?1", null, null},
         };
     }
 
@@ -219,10 +219,10 @@ public class EnhancedQueryTest {
         assertEquals(mockQuery.getParameterValue("date").getClass(), MockQuery.TemporalHolder.class);
         assertEquals(mockQuery.getParameterValue("cal").getClass(), MockQuery.TemporalHolder.class);
 
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("date")).getDate(), date);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("date")).getTemporalType(), TemporalType.DATE);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("cal")).getCalendar(), cal);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("cal")).getTemporalType(), TemporalType.TIME);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("date")).getDate(), date);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("date")).getTemporalType(), TemporalType.DATE);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("cal")).getCalendar(), cal);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("cal")).getTemporalType(), TemporalType.TIME);
 
 
         query = EnhancedQuery.createNativeQuery(entityManager, "SELECT * FROM foo WHERE bar = ?1 AND baz = ?2");
@@ -235,10 +235,10 @@ public class EnhancedQueryTest {
         assertEquals(mockQuery.getParameterValue(1).getClass(), MockQuery.TemporalHolder.class);
         assertEquals(mockQuery.getParameterValue(2).getClass(), MockQuery.TemporalHolder.class);
 
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(1)).getDate(), date);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(1)).getTemporalType(), TemporalType.DATE);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(2)).getCalendar(), cal);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(2)).getTemporalType(), TemporalType.TIME);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(1)).getDate(), date);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(1)).getTemporalType(), TemporalType.DATE);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(2)).getCalendar(), cal);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(2)).getTemporalType(), TemporalType.TIME);
     }
 
     @Test
@@ -531,10 +531,10 @@ public class EnhancedQueryTest {
         MockQuery mockQuery = entityManager.getMockQueries().get(0);
 
         assertEquals(mockQuery.getParameterValue("var"), 123);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("xyz")).getDate(), date);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("xyz")).getTemporalType(), TemporalType.DATE);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("zzz")).getCalendar(), cal);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue("zzz")).getTemporalType(), TemporalType.TIME);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("xyz")).getDate(), date);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("xyz")).getTemporalType(), TemporalType.DATE);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("zzz")).getCalendar(), cal);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue("zzz")).getTemporalType(), TemporalType.TIME);
 
 
         query = EnhancedQuery.createNativeQuery(entityManager, "SELECT * FROM foo WHERE bar = ?1 AND baz = ?2 AND town = ?3");
@@ -563,10 +563,86 @@ public class EnhancedQueryTest {
         mockQuery = entityManager.getMockQueries().get(1);
 
         assertEquals(mockQuery.getParameterValue(1), 123);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(2)).getDate(), date);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(2)).getTemporalType(), TemporalType.DATE);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(3)).getCalendar(), cal);
-        assertEquals(((MockQuery.TemporalHolder)mockQuery.getParameterValue(3)).getTemporalType(), TemporalType.TIME);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(2)).getDate(), date);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(2)).getTemporalType(), TemporalType.DATE);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(3)).getCalendar(), cal);
+        assertEquals(((MockQuery.TemporalHolder) mockQuery.getParameterValue(3)).getTemporalType(), TemporalType.TIME);
 
+    }
+
+
+    @Test
+    public void testSetIdentifiers() {
+        MockEntityManager entityManager = new MockEntityManager();
+        EnhancedQuery query = EnhancedQuery.createNativeQuery(entityManager, "TRUNCATE :tableNames");
+
+        boolean exception = false;
+        try {
+            query.setIdentifiers("tableNames", new String[0]);
+        } catch (Exception e) {
+            assertEquals(e.getClass(), IllegalArgumentException.class);
+            exception = true;
+        }
+        assertTrue(exception);
+
+        exception = false;
+        try {
+            query.setIdentifiers(1, new String[]{"a", "b", "c"});
+        } catch (Exception e) {
+            assertEquals(e.getClass(), IllegalArgumentException.class);
+            exception = true;
+        }
+        assertTrue(exception);
+
+        query.setIdentifiers("tableNames", new String[]{"a", "b", "c"}).getResultList();
+
+        assertEquals(entityManager.getMockQueries().size(), 1);
+        MockQuery mockQuery = entityManager.getMockQueries().get(0);
+        assertEquals(mockQuery.getQlString(), "TRUNCATE a, b, c");
+
+
+        query = EnhancedQuery.createNativeQuery(entityManager, "TRUNCATE ?1");
+
+        exception = false;
+        try {
+            query.setIdentifiers(1, new String[0]);
+        } catch (Exception e) {
+            assertEquals(e.getClass(), IllegalArgumentException.class);
+            exception = true;
+        }
+        assertTrue(exception);
+
+        exception = false;
+        try {
+            query.setIdentifiers("tableNames", new String[]{"a", "b", "c"});
+        } catch (Exception e) {
+            assertEquals(e.getClass(), IllegalArgumentException.class);
+            exception = true;
+        }
+        assertTrue(exception);
+
+        query.setIdentifiers(1, new String[]{"a", "b", "c"}).getResultList();
+
+        assertEquals(entityManager.getMockQueries().size(), 2);
+        mockQuery = entityManager.getMockQueries().get(1);
+        assertEquals(mockQuery.getQlString(), "TRUNCATE a, b, c");
+    }
+
+    @Test
+    public void testSetIdentifiersList() {
+        MockEntityManager entityManager = new MockEntityManager();
+        EnhancedQuery query = EnhancedQuery.createNativeQuery(entityManager, "TRUNCATE :tableNames");
+        query.setIdentifiers("tableNames", Arrays.asList("a", "b", "c")).getResultList();
+
+        assertEquals(entityManager.getMockQueries().size(), 1);
+        MockQuery mockQuery = entityManager.getMockQueries().get(0);
+        assertEquals(mockQuery.getQlString(), "TRUNCATE a, b, c");
+
+        query = EnhancedQuery.createNativeQuery(entityManager, "TRUNCATE ?1");
+        query.setIdentifiers(1, Arrays.asList("a", "b", "c")).getResultList();
+
+        assertEquals(entityManager.getMockQueries().size(), 2);
+        mockQuery = entityManager.getMockQueries().get(1);
+        assertEquals(mockQuery.getQlString(), "TRUNCATE a, b, c");
     }
 }
