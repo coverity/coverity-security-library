@@ -5,6 +5,24 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Provides an enhanced JPA Query implementation which allows the parameterization of query identifiers. For example,
+ * instead of
+ *
+ *   Query query = em.createNativeQuery("SELECT * FROM " + tableName);
+ *   query.getResultList();
+ *
+ * You can write:
+ *
+ *   EnhancedQuery query = EnhancedQuery.createNativeQuery(em, "SELECT * FROM :tableName");
+ *   query.setIdentifier("tableName", tableName);
+ *   query.getResultList();
+ *
+ * This interface allows for creating both native and JPQL queries via the static createNativeQuery and createQuery
+ * methods. Both positional and named parameter styles are allowed. Identfiers must be set using the setIdentfier()
+ * method instead of the setParameter(), since otherwise it may be ambiguous; consider "SELECT :foo FROM myTable".
+ *
+ */
 public abstract class EnhancedQuery implements Query {
 
     private static final Pattern NAMED_PARAM_PATTERN = Pattern.compile(":[a-zA-Z0-9]+");
@@ -25,10 +43,26 @@ public abstract class EnhancedQuery implements Query {
         flushMode = entityManager.getFlushMode();
     }
 
+    /**
+     * Creates an EnhancedQuery instance using the provided JPQL query string. The query string may have either
+     * positional or named parameters (but not both).
+     *
+     * @param entityManager The entity manager against which the query will be executed.
+     * @param jpqlString The parameterized JPQL query string.
+     * @return The EnhancedQuery instance.
+     */
     public static EnhancedQuery createQuery(EntityManager entityManager, String jpqlString) {
         return createQuery(entityManager, jpqlString, false);
     }
 
+    /**
+     * Creates an EnhancedQuery instance using the provided native query string. The query string may have either
+     * positional or named parameters (but not both).
+     *
+     * @param entityManager The entity manager against which the query will be executed.
+     * @param sqlString The parameterized native query string.
+     * @return The EnhancedQuery instance.
+     */
     public static EnhancedQuery createNativeQuery(EntityManager entityManager, String sqlString) {
         return createQuery(entityManager, sqlString, true);
     }
@@ -91,18 +125,72 @@ public abstract class EnhancedQuery implements Query {
     @Override
     public abstract EnhancedQuery setParameter(Parameter<Calendar> param, Calendar value, TemporalType temporalType);
 
+    /**
+     * Sets a parameter as an identifier.
+     *
+     * @param position The positional parameter to be set.
+     * @param value The identifier value. An exception will be thrown if the identifier value has invalid characters.
+     * @return This EnhancedQuery instance.
+     */
     public abstract EnhancedQuery setIdentifier(int position, String value);
 
+    /**
+     * Sets a parameter as an identifier.
+     *
+     * @param name The named parameter to be set.
+     * @param value The identifier value. An exception will be thrown if the identifier value has invalid characters.
+     * @return This EnhancedQuery instance.
+     */
     public abstract EnhancedQuery setIdentifier(String name, String value);
 
+    /**
+     * Sets a parameter to a list of identifiers. For example:
+     *   EnhancedQuery.createNativeQuery(em, "SELECT ?1 FROM myTable").setIdentifiers(1, new String[] {"a", "b"});
+     * will result in the query "SELECT a, b FROM myTable".
+     *
+     * @param position The positional parameter to be set.
+     * @param values The identifier values. An exception will be thrown if any of the identifiers value have invalid
+     *               characters.
+     * @return This EnhancedQuery instance.
+     */
     public abstract EnhancedQuery setIdentifiers(int position, String[] values);
 
+    /**
+     * Sets a parameter to a list of identifiers. For example:
+     *   EnhancedQuery.createNativeQuery(em, "SELECT :colNames FROM myTable").setIdentifiers("colNames", new String[] {"a", "b"});
+     * will result in the query "SELECT a, b FROM myTable".
+     *
+     * @param name The named parameter to be set.
+     * @param values The identifier values. An exception will be thrown if any of the identifiers value have invalid
+     *               characters.
+     * @return This EnhancedQuery instance.
+     */
     public abstract EnhancedQuery setIdentifiers(String name, String[] values);
 
+    /**
+     * Sets a parameter to a list of identifiers. For example:
+     *   EnhancedQuery.createNativeQuery(em, "SELECT ?1 FROM myTable").setIdentifiers(1, Arrays.asList("a", "b"));
+     * will result in the query "SELECT a, b FROM myTable".
+     *
+     * @param position The positional parameter to be set.
+     * @param values The identifier values. An exception will be thrown if any of the identifiers value have invalid
+     *               characters.
+     * @return This EnhancedQuery instance.
+     */
     public EnhancedQuery setIdentifiers(int position, Collection<String> values) {
         return setIdentifiers(position, values.toArray(new String[values.size()]));
     }
 
+    /**
+     * Sets a parameter to a list of identifiers. For example:
+     *   EnhancedQuery.createNativeQuery(em, "SELECT :colNames FROM myTable").setIdentifiers("colNames", Arrays.asList("a", "b"));
+     * will result in the query "SELECT a, b FROM myTable".
+     *
+     * @param name The named parameter to be set.
+     * @param values The identifier values. An exception will be thrown if any of the identifiers value have invalid
+     *               characters.
+     * @return This EnhancedQuery instance.
+     */
     public EnhancedQuery setIdentifiers(String name, Collection<String> values) {
         return setIdentifiers(name, values.toArray(new String[values.size()]));
     }

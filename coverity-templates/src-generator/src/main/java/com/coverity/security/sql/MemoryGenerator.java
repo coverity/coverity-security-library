@@ -2,10 +2,9 @@ package com.coverity.security.sql;
 
 import org.eclipse.jdt.core.dom.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
@@ -368,14 +367,16 @@ public class MemoryGenerator {
 
         unit.types().add(type);
 
-        FileWriter fw = null;
-        try {
-            File packageDir = new File(outputDir, "com/coverity/security/sql");
-            if (!packageDir.exists()) {
-                packageDir.mkdirs();
+        File packageDir = new File(outputDir, "com/coverity/security/sql");
+        if (!packageDir.exists()) {
+            if (!packageDir.mkdirs()) {
+                throw new IllegalStateException("Unable to create output directory: " + packageDir.getAbsolutePath());
             }
+        }
 
-            fw = new FileWriter(new File(packageDir, "MemoryPreparedStatement.java"));
+        Writer fw = null;
+        try {
+            fw = new OutputStreamWriter(new FileOutputStream(new File(packageDir, "MemoryPreparedStatement.java")), StandardCharsets.UTF_8);
             fw.write(unit.toString());
             fw.close();
         } catch (IOException e) {
