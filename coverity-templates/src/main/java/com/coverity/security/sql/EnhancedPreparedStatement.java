@@ -4,46 +4,48 @@ import java.sql.*;
 import java.util.Collection;
 
 /**
- * A drop-in replacement for PreparedStatements which allows for SQL identifiers to be parameterized. For example, the
- * following original code:
+ * <p>A drop-in replacement for <code>PreparedStatements</code> which allows for SQL identifiers to be parameterized. For example, the
+ * following original code:</p>
  *
- *   PreparedStatement stmt = conn.prepareStatement("SELECT MAX(" + colName + ") FROM mytable WHERE name=?");
- *   stmt.setString(1, "foo");
- *   ResultSet rs = stmt.executeQuery();
- *   ...
- *   rs.close();
- *   stmt.close();
+ * <p><code>PreparedStatement stmt = conn.prepareStatement("SELECT MAX(" + colName + ") FROM mytable WHERE name=?");<br/>
+ *   stmt.setString(1, "foo");<br/>
+ *   ResultSet rs = stmt.executeQuery();<br/>
+ *   ...<br/>
+ *   rs.close();<br/>
+ *   stmt.close();</code></p>
  *
- * could be replaced with the following, which would safely parameterize the column name
+ * <p>could be replaced with the following, which would safely parameterize the column name</p>
  *
- *   EnhancedPrepradeStatement stmt = EnhancedPreparedStatement.prepareStatement(conn, "SELECT MAX(?) FROM mytable WHERE name=?");
- *   stmt.setIdentifier(1, colName);
- *   stmt.setString(2, "foo");
- *   ResultSet rs = stmt.executeQuery();
- *   ...
- *   rs.close();
- *   stmt.close();
+ * <p><code>EnhancedPrepradeStatement stmt = EnhancedPreparedStatement.prepareStatement(conn, "SELECT MAX(?) FROM mytable WHERE name=?");<br/>
+ *   stmt.setIdentifier(1, colName);<br/>
+ *   stmt.setString(2, "foo");<br/>
+ *   ResultSet rs = stmt.executeQuery();<br/>
+ *   ...<br/>
+ *   rs.close();<br/>
+ *   stmt.close();</code></p>
  *
- * The EnhancedPreparedStatement uses metadata provided by the JDBC connection to understand how to quote identifiers,
+ * <p>The <code>EnhancedPreparedStatement</code> uses metadata provided by the JDBC connection to understand how to quote identifiers,
  * so it is safe to use with any JDBC-compatible backend. Note that not all strings are allowed as identifiers; for
  * example, MySQL uses the backtick ` to quote identifiers, so identifiers cannot contain this character. The
- * EnhancedPreparedStatement will throw an IllegalArgumentException in the case that such illegal strings are used.
+ * <code>EnhancedPreparedStatement</code> will throw an <code>IllegalArgumentException</code> in the case that such illegal strings are used.</p>
  *
- * The EnhancedPreparedStatement is a facade which remembers the parameters which are set on it and lazily prepares
+ * <p>The <code>EnhancedPreparedStatement</code> is a facade which remembers the parameters which are set on it and lazily prepares
  * an underlying JDBC prepared statement when it is time to actually execute the query. This has a number of
- * implications:
+ * implications:</p>
  *
- * * There is associated memory overhead with the EnhancedPreparedStatement remembering values passed to it. This
- *   shouldn't generally be a concern unless your application is building many EnhancedPreparedStatements
- *   simultaneously.
- * * Because the underlying JDBC implementation needs to recompile the query every identifiers change, the
- *   EnhancedPreparedStatement class builds a new JDBC PreparedStatement every time it is executed. If you are executing
- *   the same or similar queries many times, your performance may suffer. Consider using the ParameterizedStatement
- *   class in this case.
- * * Many of the advanced methods of the PreparedStatement class (such as batch commands or fetching column metadata
+ * <ul>
+ *   <li>There is associated memory overhead with the <code>EnhancedPreparedStatement</code> remembering values passed to it. This
+ *   shouldn't generally be a concern unless your application is building many <code>EnhancedPreparedStatements</code>
+ *   simultaneously.</li>
+ *   <li>Because the underlying JDBC implementation needs to recompile the query every identifiers change, the
+ *   <code>EnhancedPreparedStatement</code> class builds a new JDBC <code>PreparedStatement</code> every time it is executed.
+ *   If you are executing the same or similar queries many times, your performance may suffer. Consider using the
+ *   {@link ParameterizedStatement} class in this case.</li>
+ *   <li>Many of the advanced methods of the <code>PreparedStatement</code> class (such as batch commands or fetching column metadata
  *   before executing the query) are not supported, and any calls to those methods will result in a
- *   SQLFeatureNotSupportedException. Again, if these features are desired, consider using the ParameterizedStatement
- *   class.
+ *   <code>SQLFeatureNotSupportedException</code>. Again, if these features are desired, consider using the {@link ParameterizedStatement}
+ *   class.</li>
+ * </ul>
  *
  */
 public class EnhancedPreparedStatement extends MemoryPreparedStatement implements PreparedStatement {
@@ -64,13 +66,13 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
     }
 
     /**
-     * Creates an EnhancedPreparedStatement instance using the provided template string. Like a normal
-     * PreparedStatement, the return statement must be closed() to avoid resource leaks.
+     * Creates an <code>EnhancedPreparedStatement</code> instance using the provided template string. Like a normal
+     * <code>PreparedStatement</code>, the return statement must be <code>closed()</code> to avoid resource leaks.
      *
      * @param conn The JDBC connection.
-     * @param sql The template string, which may use "?" placeholders for SQL identifiers in addition to the usual SQL
+     * @param sql The template string, which may use <code>"?"</code> placeholders for SQL identifiers in addition to the usual SQL
      *            data values in a normal PreparedStatement.
-     * @return The EnhancedPreparedStatement instance.
+     * @return The <code>EnhancedPreparedStatement</code> instance.
      *
      * @throws SQLException If there is a problem fetching relevant metadata (necessary for quoting and/or validating
      * identifier strings) from the JDBC connection.
@@ -118,7 +120,7 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
      * valid identifier in the database's schema, or because it contains invalid characters), no exception will be
      * thrown until the query is actually executed.
      *
-     * @param parameterIndex The index of the "?" placeholder to which this identifier applies, number from 1.
+     * @param parameterIndex The index of the <code>"?"</code> placeholder to which this identifier applies, number from 1.
      * @param identifier The identifier. This string should not be quoted.
      */
     public void setIdentifier(int parameterIndex, String identifier) {
@@ -129,9 +131,9 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
     /**
      * Sets the parameter to use the provided identifiers as a comma-separated list. If any identifier is invalid
      * (either because it is not a valid identifier in the database's schema, or because it contains invalid
-     * characters), an IllegalArgumentException will be thrown.
+     * characters), an <code>IllegalArgumentException</code> will be thrown.
      *
-     * @param parameterIndex The index of the "?" placeholder to which this identifier applies, number from 1.
+     * @param parameterIndex The index of the <code>"?"</code> placeholder to which this identifier applies, number from 1.
      * @param identifiers The identifiers. These strings should not be quoted.
      */
     public void setIdentifiers(int parameterIndex, String[] identifiers) {
@@ -150,11 +152,11 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
     /**
      * Sets the parameter to use the provided identifiers as a comma-separated list. If any identifier is invalid
      * (either because it is not a valid identifier in the database's schema, or because it contains invalid
-     * characters), an IllegalArgumentException will be thrown.
+     * characters), an <code>IllegalArgumentException</code> will be thrown.
      *
-     * This is a convenience method, which is equivalent to calling setIdentifiers(parameterIndex, identifiers.toArray(new String[0]));
+     * This is a convenience method, which is equivalent to calling <code>setIdentifiers(parameterIndex, identifiers.toArray(new String[0]));</code>
      *
-     * @param parameterIndex The index of the "?" placeholder to which this identifier applies, number from 1.
+     * @param parameterIndex The index of the <code>"?"</code> placeholder to which this identifier applies, number from 1.
      * @param identifiers The identifiers. These strings should not be quoted.
      */
     public void setIdentifiers(int parameterIndex, Collection<String> identifiers) {

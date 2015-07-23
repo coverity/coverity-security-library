@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+/**
+ * Internal class used to validate and escape identifiers for queries using JDBC connections.
+ */
 class IdentifierEscaper {
     private final String identifierQuoteString;
     private final char[] extraNameChars;

@@ -6,45 +6,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a path on the filesystem, extending the java.io.File class with logic to apply runtime enforcement
+ * <p>Represents a path on the filesystem, extending the <code>java.io.File</code> class with logic to apply runtime enforcement
  * preventing unintended path traversal patterns. The goal is to avoid patterns leading to unintended path manipulation
- * defects in which an attacker may be able to manipulate the target path beyond the developer's intent.
+ * defects in which an attacker may be able to manipulate the target path beyond the developer's intent.</p>
  *
- * This class offers two ways of instantiating a SimplePath. The first is using the template() method, which can be used
- * as follows:
+ * <p>This class offers two ways of instantiating a <code>SimplePath</code>. The first is using the
+ * <code>template()</code> method, which can be used as follows:</p>
  *
- *   SimplePath path = SimplePath.template("/var/lib/myapp/users/$0/myfiles/$1", username, filename + ".txt");
+ * <p><code>SimplePath path = SimplePath.template("/var/lib/myapp/users/$0/myfiles/$1", username, filename + ".txt");</code></p>
  *
- * Alternatively, one may create a SimplePath instance using the String constructor:
+ * <p>Alternatively, one may create a <code>SimplePath</code> instance using the String constructor:</p>
  *
- *   SimplePath path = new SimplePath("/var/lib/myapp/users");
+ * <p><code>SimplePath path = new SimplePath("/var/lib/myapp/users");</code></p>
  *
- * In the latter case, care should be taken to only use constant or trusted strings in constructing the initial object.
- * The below traversal patterns should then be used to access dynamically determined paths.
+ * <p>In the latter case, care should be taken to only use constant or trusted strings in constructing the initial object.
+ * The below traversal patterns should then be used to access dynamically determined paths.</p>
  *
- * This class offers three forms of traversing paths once the initial object is created. The first reuses the template
- * pattern from the constructor:
+ * <p>This class offers three forms of traversing paths once the initial object is created. The first reuses the template
+ * pattern from the constructor:</p>
  *
- *   SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");
- *   SimplePath file = usersRoot.pathTemplate("$0/myfiles/$1", username, filename + ".txt");
+ * <p><code>SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");<br/>
+ * SimplePath file = usersRoot.pathTemplate("$0/myfiles/$1", username, filename + ".txt");</code></p>
  *
- * You can also use the sub() to traverse individual path components:
+ * <p>You can also use the <code>sub()</code> to traverse individual path components:</p>
  *
- *   SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");
- *   SimplePath file = usersRoot.sub(username).sub("myfiles").sub(filename + ".txt");
+ * <p><code>SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");<br/>
+ * SimplePath file = usersRoot.sub(username).sub("myfiles").sub(filename + ".txt");</code></p>
  *
- * For convenience, sub() accepts a variable number of arguments, so the above is equivalent to
+ * <p>For convenience, <code>sub()</code> accepts a variable number of arguments, so the above is equivalent to</p>
  *
- *   SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");
- *   SimplePath file = usersRoot.sub(username, "myfiles", filename + ".txt");
+ * <p><code>SimplePath usersRoot = new SimplePath("/var/lib/myapp/users");<br/>
+ * SimplePath file = usersRoot.sub(username, "myfiles", filename + ".txt");</code></p>
  *
- * Finally, you may traverse to an arbitrary sub-path using the path() method:
+ * <p>Finally, you may traverse to an arbitrary sub-path using the <code>path()</code> method:</p>
  *
- *   SimplePath userRoot = new SimplePath("/var/lib/myapp/users").sub(username);
- *   SimplePath file = userRoot.path("myfiles/myreport.txt");
+ * <p><code>SimplePath userRoot = new SimplePath("/var/lib/myapp/users").sub(username);<br/>
+ * SimplePath file = userRoot.path("myfiles/myreport.txt");</code></p>
  *
- * All of these patterns enforce runtime checks to prevent unintended path traversals. Read the documentation on each
- * of these methods and constructors for details.
+ * <p>All of these patterns enforce runtime checks to prevent unintended path traversals. Read the documentation on each
+ * of these methods and constructors for details.</p>
+ *
+ * <p>Note: Since the JDK doesn't offer any API which describes all of a platform's path separator characters, this
+ * class determines all the path separators for the platform using a dynamic check when the class is first loaded. It
+ * does this by iterating through all single-width UTF-16 characters, but in particular doesn't check surrogate pairs.
+ * If you are running Java on a platform which uses a surrogate-pair of UTF-16 characters as a path separator, this
+ * class may not provide safety against path manipulation defects. (That said, at the time of writing there are no known
+ * such platforms.)</p>
  *
  */
 public class SimplePath extends File {
@@ -77,8 +84,8 @@ public class SimplePath extends File {
     }
 
     /**
-     * Decides if a path component string is blacklisted, which is to say it is the disallowed value ".." or it contains
-     * a path separator character.
+     * Decides if a path component string is blacklisted, which is to say it is the disallowed value <code>".."</code>
+     * or it contains a path separator character.
      *
      * @param s The string being evaluated.
      * @return Whether or not the string is blacklist according to the above.
@@ -101,25 +108,26 @@ public class SimplePath extends File {
     }
 
     /**
-     * Builds a SimplePath instance using a template string that allows you to specify individual path components.
-     * The path will be parsed using the slash '/' character as the separator, regardless of the platform. Placeholders
-     * are written as $0, $1, etc. For example
+     * <p>Builds a <code>SimplePath</code> instance using a template string that allows you to specify individual path components.
+     * The path will be parsed using the slash <code>'/'</code> character as the separator, regardless of the platform.
+     * Placeholders are written as <code>$0</code>, <code>$1</code>, etc. For example</p>
      *
-     *   SimplePath.template("/tmp/$0/xyz/%1/$0", "foo", "bar")
+     * <p><code>SimplePath.template("/tmp/$0/xyz/$1/$0", "foo", "bar")</code></p>
      *
-     * would produce a path representing "/tmp/foo/xyz/bar/foo".
+     * <p>would produce a path representing <code>"/tmp/foo/xyz/bar/foo"</code>.</p>
      *
-     * The $0 placeholder must be the entire path component; for example
+     * <p>The <code>$0</code> placeholder must be the entire path component; for example</p>
      *
-     *   SimplePath.template("/tmp/$0/$1.txt", "foo", "bar")
+     * <p><code>SimplePath.template("/tmp/$0/$1.txt", "foo", "bar")</code></p>
      *
-     * Would result in the path string "/tmp/foo/$1.txt". The correct way to get the intended result above would be
+     * <p>Would result in the path string <code>"/tmp/foo/$1.txt"</code>. The correct way to get the intended result
+     * above would be</p>
      *
-     *   SimplePath.template("/tmp/$0/$1", "foo", "bar" + ".txt");
+     * <p><code>SimplePath.template("/tmp/$0/$1", "foo", "bar" + ".txt");</code></p>
      *
      * @param format The template string.
-     * @param values The values to insert into the template string, used one-to-one with the %s placeholder values in
-     *               the template string.
+     * @param values The values to insert into the template string, used one-to-one with the <code>$</code> placeholder
+     *               values in the template string.
      * @return The resolved SimplePath instance based on the template and values.
      */
     public static SimplePath template(final String format, final String ... values) {
@@ -149,14 +157,14 @@ public class SimplePath extends File {
     }
 
     /**
-     * Returns a SimplePath instance representing the descendant of this instance represented by the templated path.
-     * The template takes the same form as the template() method.
+     * Returns a <code>SimplePath</code> instance representing the descendant of this instance represented by the templated path.
+     * The template takes the same form as the <code>template()</code> method.
      *
      * @see SimplePath#template
      *
      * @param format The template string used to specify the child path. For safety, this should be a constant string.
      * @param values The substitution parameters to use in the child path.
-     * @return A SimplePath representing the descendant path of this instance.
+     * @return A <code>SimplePath</code> representing the descendant path of this instance.
      */
     public SimplePath pathTemplate(final String format, final String ... values) {
         return new SimplePath(this, resolveTemplate(format, values));
@@ -182,8 +190,8 @@ public class SimplePath extends File {
     }
 
     /**
-     * Constructs a SimplePath instance with the same semantics as java.io.File(String). No checking is done on this
-     * input, so it may be a fully expanded path.
+     * Constructs a <code>SimplePath</code> instance with the same semantics as <code>java.io.File(String)</code>.
+     * No checking is done on this input, so it may be a fully expanded path.
      *
      * @param pathname An arbitrary path name. No enforcement is placed on the path specified by this string, so only
      *                 constant values or trusted data should be passed to this constructor.
@@ -193,8 +201,8 @@ public class SimplePath extends File {
     }
 
     /**
-     * Constructs a new SimplePath instance where subPath can contain an arbitrary path. The assumption is that any
-     * calling method will have already validated the subPath argument.
+     * Constructs a new <code>SimplePath</code> instance where <code>subPath</code> can contain an arbitrary path. The
+     * assumption is that any calling method will have already validated the <code>subPath</code> argument.
      *
      * @param parent The parent path.
      * @param subPath The arbitrary subpath of the parent.
@@ -204,19 +212,20 @@ public class SimplePath extends File {
     }
 
     /**
-     * This method should be used to traverse descendant paths when the developer is able to specify individual
-     * directories. For example:
+     * <p>This method should be used to traverse descendant paths when the developer is able to specify individual
+     * directories. For example:</p>
      *
-     *   SimplePath blogRoot = dataRoot.sub("blogs", this.getBlogName());
-     *   SimplePath blogPost = blogRoot.sub(
-     *     new SimpleDateFormat("yyyy").format(this.getPostDate()),
-     *     new SimpleDateFormat("MM").format(this.getPostDate()),
-     *     new SimpleDateFormat("dd").format(this.getPostDate()),
-     *     this.getPostId() + ".txt");
+     * <p><code>SimplePath blogRoot = dataRoot.sub("blogs", this.getBlogName());<br/>
+     * SimplePath blogPost = blogRoot.sub(<br/>
+     * &nbsp;&nbsp;new SimpleDateFormat("yyyy").format(this.getPostDate()),<br/>
+     * &nbsp;&nbsp;new SimpleDateFormat("MM").format(this.getPostDate()),<br/>
+     * &nbsp;&nbsp;new SimpleDateFormat("dd").format(this.getPostDate()),<br/>
+     * &nbsp;&nbsp;this.getPostId() + ".txt");</code></p>
      *
      * @param children Each argument must represent a single path component and therefore cannot contain a path
-     *                 separator character. This method also disallows upwards traversals, i.e. ".." elements.
-     * @return A new SimplePath instance where the children arguments specify descendant directories or files.
+     *                 separator character. This method also disallows upwards traversals, i.e. <code>".."</code>
+     *                 elements.
+     * @return A new <code>SimplePath</code> instance where the children arguments specify descendant directories or files.
      */
     public SimplePath sub(final String ... children) {
         if (children.length == 0) {
@@ -244,21 +253,21 @@ public class SimplePath extends File {
     }
 
     /**
-     * This method should be used to traverse paths when the developer needs to allow an arbitrary number of paths to
+     * <p>This method should be used to traverse paths when the developer needs to allow an arbitrary number of paths to
      * be traversed and/or needs to allow for upwards traversals within the path. This method only enforces that the
-     * resulting path represents the same path or a descendant. An example use case might be:
+     * resulting path represents the same path or a descendant. An example use case might be:</p>
      *
-     *   SimplePath uploadRoot = dataRoot.sub("uploads").sub(username);
-     *   SimplePath requestedFile = uploadRoot.path(request.getParameter("filePath");
-     *   FileInputStream fis = new FileInputStream(requestedFile);
-     *   ...
+     * <p><code>SimplePath uploadRoot = dataRoot.sub("uploads").sub(username);<br/>
+     *   SimplePath requestedFile = uploadRoot.path(request.getParameter("filePath");<br/>
+     *   FileInputStream fis = new FileInputStream(requestedFile);<br/>
+     *   ...</code></p>
      *
-     * The child parameter can contain an arbitrary path string including path separators and upwards
+     * <p>The child parameter can contain an arbitrary path string including path separators and upwards
      * traversals. However, an exception will be thrown in the resolved directory is not a descendant of this
-     * SimplePath instance.
+     * SimplePath instance.</p>
      *
-     * @param child The subdirectory or descendant file the new SimplePath will represent
-     * @return A SimplePath instance representing the subdirectory of this instance.
+     * @param child The subdirectory or descendant file the new <code>SimplePath</code> will represent
+     * @return A <code>SimplePath</code> instance representing the subdirectory of this instance.
      */
     public SimplePath path(final String child) {
         if (child.equals("") || child.equals(".")) {

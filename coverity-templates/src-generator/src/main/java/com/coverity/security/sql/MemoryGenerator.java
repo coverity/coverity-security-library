@@ -10,6 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The class is responsible for generating the <code>MemoryPreparedStatement</code> abstract class. It is called during
+ * the generate-sources phase of the build. The generated class implements all of the <code>set*()</code> methods by
+ * saving their arguments to a MemoryBlock object, and puts that object into an array of saved parameters. This class
+ * also generates a <code>apply()</code> method which will call the appropriate <code>set*</code> methods on the passed
+ * in <code>PreparedStatement</code> using the remembered values saved in the MemoryBlock array.
+ *
+ */
 public class MemoryGenerator {
 
     private static Type classToType(AST ast, Class<?> clazz) {

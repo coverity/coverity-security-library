@@ -6,6 +6,10 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.util.*;
 
+/**
+ * Implementation of the EnhancedQuery class which uses positional parameters. Throws exceptions on all of the named
+ * parameters methods.
+ */
 class EnhancedPositionalQuery extends EnhancedQuery {
 
     private static class PositionalParameter<T> implements Parameter<T> {

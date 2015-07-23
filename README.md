@@ -1,15 +1,15 @@
 [![Build Status](https://travis-ci.org/coverity/coverity-security-library.png?branch=develop)](https://travis-ci.org/coverity/coverity-security-library)
 
 # Coverity Security Library
-The Coverity Security Library (CSL) is a lightweight set of escaping routines for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.
+The Coverity Security Library (CSL) is a lightweight set of utilities for fixing cross-site scripting (XSS), SQL injection, and other security defects in Java web applications.
 
 Here's why it's worth checking out:
 
 * **It's secure:** We take the security of CSL seriously. Every change is carefully scrutinized through a process that includes manual code review, static analysis, fuzz testing, and unit testing.
 
-* **It's convenient:** CSL contains escapers for XSS and SQL injection that are missing from standard libraries like Apache Commons and Java EE.  We use fast, easy to invoke static methods with short, intuitive names.  We also provide hooks for Expression Language (EL) to make it easy to use within JSPs.
+* **It's convenient:** CSL contains escapers for XSS and SQL injection that are missing from standard libraries like Apache Commons and Java EE.  We use fast, easy to invoke static methods with short, intuitive names.  We also provide hooks for Expression Language (EL) to make it easy to use within JSPs. CSL also contains enhanced templating libraries for SQL statements and filesystem paths which work as drop-in replacements that allow you to safely specify dynamic values like table names or folder/file names.
 
-* **It's small:** CSL has no external dependencies and is a minimalist library. This means it's fast and does not require any configuration besides dropping a JAR in the right location or modifying your build to do it. 
+* **It's small:** CSL has no external runtime dependencies and is a minimalist library. This means it's fast and does not require any configuration besides dropping a JAR in the right location or modifying your build to do it.
 
 * **It's free:** CSL is distributed under a BSD-style license.  We would appreciate patches be sent back to us but it's not required.
 
@@ -62,6 +62,84 @@ return "<div onclick='alert(\""
 ```
 
 To contact the SRL, please email us at <srl@coverity.com>. Fork away, we look forward to your pull requests!
+
+
+## Templates
+
+The coverity-templates module contains APIs for safely specifying dynamic values in SQL and filesystem path contexts.
+For example, if you have a piece of code which uses a user-controllable value for the ORDER BY clause, you may have
+code that looks like this:
+
+```java
+PreparedStatement stmt = conn.prepareStatement("SELECT * FROM foo WHERE x=? ORDER BY " + orderBy);
+stmt.setInteger(1, 100);
+ResultSet rs = stmt.executeQuery();
+// ...
+```
+
+With the EnhancedPreparedStatement class, you can set identifiers in addition to data values:
+
+```java
+EnhancedPreparedStatement stmt = EnhancedPreparedStatement.prepareStatement(conn, "SELECT * FROM foo WHERE x=? ORDER BY ?");
+stmt.setInteger(1, 100);
+stmt.setIdentifier(2, orderBy);
+ResultSet rs = stmt.executeQuery();
+// ...
+```
+
+The library is able to use the JDBC metadata to safely validate and quote identifiers no matter what SQL backend you're
+using, so an attacker able to modify the value of `orderBy` would be unable to change the intent of this SQL query.
+
+The module also contains an API for safely specifying filesystem paths. Consider the following code for fetching uploaded
+files:
+
+```java
+File uploadRoot = new File("/home/tomcat/userdata/uploads");
+File file = new File(uploadRoot, request.getParameter("filename"));
+IOUtils.copy(new FileInputStream(file), request.getOutputStream());
+```
+
+By specifying `"../../../../etc/passwd"` an attacker could read the `/etc/passwd` file from the server. Blacklisting
+`File.separatorChar` is insufficient since some platforms support multiple path separator characters (like Windows, which
+supports both `\` and `/`).
+
+The `SimplePath` API understands all of the platform's path separators as well as upward traversal patterns, and checks
+the input against upward traversal. The above code could be rewritten as:
+
+```java
+SimplePath uploadRoot = new SimplePath("/home/tomcat/userdata/uploads");
+SimplePath file = uploadRoot.path(request.getParameter("filename"));
+IOUtils.copy(new FileInputStream(file), request.getOutputStream());
+```
+
+With this code, an attacker can specify any path as long as it doesn't escape the `/home/tomcat/userdata/uploads`
+directory. So the call to `uploadRoot.path()` would through an exception on `"../../../../etc/passwd"` but would allow
+`"foo/bar/../baz.txt"`.
+
+### TrustySimplePath and @TrustedPath
+
+The coverity-templates module contains the `TrustySimplePath` which extends `SimplePath` and the `@TrustedPath`
+annotation which can be used to aid Coverity's static analysis. Their use is optional, but may help you reduce the
+incidence of false positives when using Coverity's Secure Coding Practices checkers. The `TrustySimplePath` class
+will implicitly trust data coming from Java system properties and environment variables so that code such as
+
+```java
+new TrustySimplePath(System.getProperty("java.io.tmpdir"));
+new TrustySimplePath(System.getenv("HOME"));
+```
+
+doesn't trigger warnings about using dynamic data in filesystem sinks. The `@TrustedPath` can be used to whitelist
+other dynamic data sources for either `TrustySimplePath` or for `SimplePath`.
+
+```java
+public File getUploadedFile(String path) {
+    return new SimplePath(getUserUploadRoot()).path(path);
+}
+@TrustedPath
+public void getUserUploadRoot() {
+    return configProperties.getProperty("user_upload_root");
+}
+```
 
 # License
     Copyright (c) 2012, Coverity, Inc. 

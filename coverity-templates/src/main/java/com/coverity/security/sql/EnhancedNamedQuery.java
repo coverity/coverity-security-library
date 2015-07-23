@@ -6,6 +6,10 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.util.*;
 
+/**
+ * Implementation of the EnhancedQuery class which uses named parameters. Throws exceptions on all of the positional
+ * parameters methods.
+ */
 class EnhancedNamedQuery extends EnhancedQuery {
 
     private static class NamedParameter<T> implements Parameter<T> {
