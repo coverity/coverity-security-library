@@ -202,4 +202,10 @@ public class EnhancedPreparedStatementTest {
         assertEquals(mockStmt.getSql(), "SELECT `a`, `b`, `c` FROM foo");
     }
 
+    @Test
+    public void testCloseUnusedStatement() throws SQLException {
+        MockConnection connection = new MockConnection("`", "#@");
+        EnhancedPreparedStatement stmt = EnhancedPreparedStatement.prepareStatement(connection, "SELECT * from ?");
+        stmt.close();
+    }
 }

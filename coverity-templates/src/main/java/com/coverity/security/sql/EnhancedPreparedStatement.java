@@ -200,7 +200,9 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
 
     @Override
     public void close() throws SQLException {
-        lastUsedStmt.close();
+        if (lastUsedStmt != null) {
+            lastUsedStmt.close();
+        }
     }
 
     // Unsupported methods

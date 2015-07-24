@@ -60,6 +60,10 @@ public class SimplePath extends File {
      * A cached array of the path separator characters used by this JVM's default FileSystem provider.
      */
     private static final char[] separatorChars = getPathSeparators();
+    /**
+     * Blacklisted characters that never get to be in any path ever.
+     */
+    private static final char[] BLACKLISTED_CHARS = new char[] { '\0' };
 
     /**
      * Loops through all possible characters, returning an array of those which the default FileSystem treats as
@@ -88,9 +92,9 @@ public class SimplePath extends File {
      * or it contains a path separator character.
      *
      * @param s The string being evaluated.
-     * @return Whether or not the string is blacklist according to the above.
+     * @return Whether or not the string is blacklisted according to the above.
      */
-    private static boolean isBlackListed(String s) {
+    private static boolean isBlackListedComponent(String s) {
         if (s.equals("..")) {
             return true;
         }
@@ -98,8 +102,34 @@ public class SimplePath extends File {
         final char[] chars = s.toCharArray();
         final char[] sepChars = separatorChars;
         for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
             for (int j = 0 ; j < sepChars.length; j++) {
-                if (chars[i] == sepChars[j]) {
+                if (c == sepChars[j]) {
+                    return true;
+                }
+            }
+            for (int j = 0; j < BLACKLISTED_CHARS.length; j++) {
+                if (c == BLACKLISTED_CHARS[j]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Decides if a path has any blacklisted characters. This just checks for characters in the BLACKLISTED_CHARS
+     * array.
+     *
+     * @param s The string being evaluated.
+     * @return Whether or not the string is blacklisted according to the above.
+     */
+    private static boolean isBlackListedPath(String s) {
+        final char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            final char c = chars[i];
+            for (int j = 0; j < BLACKLISTED_CHARS.length; j++) {
+                if (c == BLACKLISTED_CHARS[j]) {
                     return true;
                 }
             }
@@ -142,7 +172,7 @@ public class SimplePath extends File {
             final String piece = pieces[i];
             if ((placeHolderIndex = parsePlaceHolder(piece)) != -1) {
                 final String value = values[placeHolderIndex];
-                if (isBlackListed(value)) {
+                if (isBlackListedComponent(value)) {
                     throw new IllegalArgumentException("Child path cannot have path separators or be an upwards traversal");
                 }
                 sb.append(value);
@@ -198,6 +228,9 @@ public class SimplePath extends File {
      */
     public SimplePath(String pathname) {
         super(pathname);
+        if (isBlackListedPath(pathname)) {
+            throw new IllegalArgumentException("Path contains invalid characters.");
+        }
     }
 
     /**
@@ -238,7 +271,7 @@ public class SimplePath extends File {
                 continue;
             }
 
-            if (isBlackListed(child)) {
+            if (isBlackListedComponent(child)) {
                 throw new IllegalArgumentException("Invalid child argument: " + child);
             }
 
@@ -272,6 +305,9 @@ public class SimplePath extends File {
     public SimplePath path(final String child) {
         if (child.equals("") || child.equals(".")) {
             return this;
+        }
+        if (isBlackListedPath(child)) {
+            throw new IllegalArgumentException("Path contains an invalid character.");
         }
         final File subDir = new File(this, child);
         validate(this, subDir);
