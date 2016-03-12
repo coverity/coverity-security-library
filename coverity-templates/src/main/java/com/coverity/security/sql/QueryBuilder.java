@@ -11,19 +11,19 @@ import java.sql.SQLException;
  * allows them to be dynamically built but enforces the safe use of @CompileTimeConstant pieces. For example:</p>
  *
  * <p><code>QueryBuilder qb = new QueryBuilder("SELECT * FROM foo ");<br>
-  *     if (name != null) {<br>
- *         qb.append("WHERE name=?");<br>
+ *     if (name != null) {<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;qb.append("WHERE name=? ");<br>
  *     }<br>
  *     if (orderBy != null) {<br>
- *         qb.append("ORDER BY ?");<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;qb.append("ORDER BY ? ");<br>
  *     }<br>
  *     EnhancedPreparedStatement stmt = qb.buildEnhancedPreparedStatement();<br>
  *     int index = 1;<br>
  *     if (name != null) {<br>
- *         stmt.setString(index++, name);<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;stmt.setString(index++, name);<br>
  *     }<br>
  *     if (orderBy != null) {<br>
- *         stmt.setIdentifier(index++, orderBy);<br>
+ *     &nbsp;&nbsp;&nbsp;&nbsp;stmt.setIdentifier(index++, orderBy);<br>
  *     }<br>
  *     ResultSet rs = stmt.executeQuery();<br>
  *     // ...</code></p>
