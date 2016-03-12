@@ -1,5 +1,7 @@
 package com.coverity.security.sql;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -87,7 +89,7 @@ public class ParameterizedStatement {
      * @throws SQLException Thrown if there is an exception thrown by the JDBC connection when this class tries to fetch
      * relevant metadata from the connection.
      */
-    public static ParameterizedStatement prepare(Connection connection, String sql) throws SQLException {
+    public static ParameterizedStatement prepare(Connection connection, @CompileTimeConstant final String sql) throws SQLException {
         // TODO: Do proper tokenizing and parsing instead of regex matching
         final Matcher matcher = PARSER_PATTERN.matcher(sql);
         int start = 0;

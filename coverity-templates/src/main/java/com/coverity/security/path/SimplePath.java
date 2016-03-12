@@ -1,5 +1,7 @@
 package com.coverity.security.path;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -160,8 +162,10 @@ public class SimplePath extends File {
      *               values in the template string.
      * @return The resolved SimplePath instance based on the template and values.
      */
-    public static SimplePath template(final String format, final String ... values) {
-        return new SimplePath(resolveTemplate(format, values));
+    public static SimplePath template(@CompileTimeConstant final String format, final String ... values) {
+        @SuppressWarnings("CompileTimeConstant") // resolveTemplate format argument is @CompileTimeConstant, and performs validation on values
+        SimplePath simplePath = new SimplePath(resolveTemplate(format, values));
+        return simplePath;
     }
 
     private static String resolveTemplate(final String format, final String ... values) {
@@ -196,7 +200,7 @@ public class SimplePath extends File {
      * @param values The substitution parameters to use in the child path.
      * @return A <code>SimplePath</code> representing the descendant path of this instance.
      */
-    public SimplePath pathTemplate(final String format, final String ... values) {
+    public SimplePath pathTemplate(@CompileTimeConstant final String format, final String ... values) {
         return new SimplePath(this, resolveTemplate(format, values));
     }
 
@@ -226,7 +230,7 @@ public class SimplePath extends File {
      * @param pathname An arbitrary path name. No enforcement is placed on the path specified by this string, so only
      *                 constant values or trusted data should be passed to this constructor.
      */
-    public SimplePath(String pathname) {
+    public SimplePath(@CompileTimeConstant final String pathname) {
         super(pathname);
         if (isBlackListedPath(pathname)) {
             throw new IllegalArgumentException("Path contains invalid characters.");
@@ -311,7 +315,9 @@ public class SimplePath extends File {
         }
         final File subDir = new File(this, child);
         validate(this, subDir);
-        return new SimplePath(subDir.getPath());
+        @SuppressWarnings("CompileTimeConstant") // Above line does the necessary validation
+        SimplePath subPath = new SimplePath(subDir.getPath());
+        return subPath;
     }
 
     private static void validate(File root, File subDir) {
@@ -336,7 +342,12 @@ public class SimplePath extends File {
     @Override
     public SimplePath getParentFile() {
         File parent = super.getParentFile();
-        return (parent == null ? null : new SimplePath(parent.getPath()));
+        if (parent == null) {
+            return null;
+        }
+        @SuppressWarnings("CompileTimeConstant") // Upwards traversal is intentional inside this method
+        SimplePath parentPath = new SimplePath(parent.getPath());
+        return parentPath;
     }
 
     private static String pathJoin(final List<String> s) {

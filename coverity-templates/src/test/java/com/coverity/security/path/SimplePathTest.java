@@ -1,5 +1,6 @@
 package com.coverity.security.path;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -252,7 +253,7 @@ public class SimplePathTest {
     }
 
     private static class ErrorThrowingSimplePath extends SimplePath {
-        public ErrorThrowingSimplePath(String pathname) {
+        public ErrorThrowingSimplePath(@CompileTimeConstant final String pathname) {
             super(pathname);
         }
 

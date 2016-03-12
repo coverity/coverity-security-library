@@ -1,5 +1,7 @@
 package com.coverity.security.sql;
 
+import com.google.errorprone.annotations.CompileTimeConstant;
+
 import java.sql.*;
 import java.util.Collection;
 
@@ -77,7 +79,7 @@ public class EnhancedPreparedStatement extends MemoryPreparedStatement implement
      * @throws SQLException If there is a problem fetching relevant metadata (necessary for quoting and/or validating
      * identifier strings) from the JDBC connection.
      */
-    public static EnhancedPreparedStatement prepareStatement(Connection conn, String sql) throws SQLException {
+    public static EnhancedPreparedStatement prepareStatement(Connection conn, @CompileTimeConstant final String sql) throws SQLException {
         // TODO: Do proper tokenizing and parsing instead of regex matching
         EnhancedPreparedStatement result = new EnhancedPreparedStatement(conn, sql.split("\\?", -1));
         return result;
