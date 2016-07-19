@@ -1,0 +1,834 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Escape.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">coverity-escapers</a> &gt; <a href="index.source.html" class="el_package">com.coverity.security</a> &gt; <span class="el_source">Escape.java</span></div><h1>Escape.java</h1><pre class="source lang-java linenums">/**
+ *   Copyright (c) 2012-2016, Coverity, Inc.
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without modification,
+ *   are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or other
+ *   materials provided with the distribution.
+ *   - Neither the name of Coverity, Inc. nor the names of its contributors may be used
+ *   to endorse or promote products derived from this software without specific prior
+ *   written permission from Coverity, Inc.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY
+ *   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *   OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND INFRINGEMENT ARE DISCLAIMED.
+ *   IN NO EVENT SHALL THE COPYRIGHT HOLDER OR  CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ *   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *   WHETHER IN CONTRACT,  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ *   OF SUCH DAMAGE.
+ */
+package com.coverity.security;
+
+/**
+ * Escape is a small set of methods for escaping tainted data. These escaping
+ * methods are useful in transforming user-controlled (&quot;tainted&quot;) data into
+ * forms that are safe from being interpreted as something other than data, such
+ * as JavaScript.
+ *
+ * At this time most of these escaping routines focus on cross-site scripting
+ * mitigations. Each method is good for a different HTML context. For a primer
+ * on HTML contexts, see OWASP's XSS Prevention Cheat Sheet (note however that
+ * the escaping routines are not implemented exactly according to OWASP's
+ * recommendations) or the Coverity Security Advisor documentation.
+ * Also see the Coverity Security Research Laboratory blog on
+ * how to properly use each function.
+ *
+ * While Coverity's static analysis product references these escaping routines
+ * as exemplars and understands their behavior, there is no dependency on
+ * Coverity products and these routines are completely standalone. Feel free to
+ * use them! Just make sure you use them correctly.
+ *
+ * @author Romain Gaucher
+ * @author Andy Chou
+ * @author Jon Passki
+ * @author Alex Kouzemtchenko
+ *
+ */
+<span class="nc" id="L54">public class Escape {</span>
+
+    /**
+     * HTML entity escaping for text content and attributes.
+     *
+     * HTML entity escaping that is appropriate for the most common HTML contexts:
+     * PCDATA and &quot;normal&quot; attributes (non-URI, non-event, and non-CSS attributes). &lt;br&gt;
+     * Note that we do not recommend using non-quoted HTML attributes since
+     * the security obligations vary more between web browser. We recommend
+     * to always quote (single or double quotes) HTML attributes.&lt;br&gt;
+     * This method is generic to HTML entity escaping, and therefore escapes more
+     * characters than usually necessary -- mostly to handle non-quoted attribute values.
+     * If this method is somehow too slow, such as you output megabytes of text with spaces,
+     * please use the {@link #htmlText(String)} method which only escape HTML text specific
+     * characters.
+     *
+     *
+     * The following characters are escaped:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * HTML characters: &lt;code&gt;' (U+0022)&lt;/code&gt;, &lt;code&gt;&quot; (U+0027)&lt;/code&gt;,
+     *                  &lt;code&gt;\ (U+005C)&lt;/code&gt;, &lt;code&gt;/ (U+002F)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;amp; (U+0026)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Control characters: &lt;code&gt;\t (U+0009)&lt;/code&gt;, &lt;code&gt;\n (U+000A)&lt;/code&gt;,
+     *                     &lt;code&gt;\f (U+000C)&lt;/code&gt;, &lt;code&gt;\r (U+000D)&lt;/code&gt;,
+     *                     &lt;code&gt;SPACE (U+0020)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Unicode newlines: &lt;code&gt;LS (U+2028)&lt;/code&gt;, &lt;code&gt;PS (U+2029)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the HTML escaped string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String html(String input) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L96">            return null;</span>
+
+<span class="fc" id="L98">        int length = input.length();</span>
+<span class="fc" id="L99">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L102">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L103" title="All 15 branches covered.">            switch (c) {</span>
+            // Control chars
+            case '\t':
+<span class="fc" id="L106">                output.append(&quot;&amp;#x09;&quot;);</span>
+<span class="fc" id="L107">                break;</span>
+            case '\n':
+<span class="fc" id="L109">                output.append(&quot;&amp;#x0A;&quot;);</span>
+<span class="fc" id="L110">                break;</span>
+            case '\f':
+<span class="fc" id="L112">                output.append(&quot;&amp;#x0C;&quot;);</span>
+<span class="fc" id="L113">                break;</span>
+            case '\r':
+<span class="fc" id="L115">                output.append(&quot;&amp;#x0D;&quot;);</span>
+<span class="fc" id="L116">                break;</span>
+            // Chars that have a meaning for HTML
+            case '\'':
+<span class="fc" id="L119">                output.append(&quot;&amp;#39;&quot;);</span>
+<span class="fc" id="L120">                break;</span>
+            case '\\':
+<span class="fc" id="L122">                output.append(&quot;&amp;#x5C;&quot;);</span>
+<span class="fc" id="L123">                break;</span>
+            case ' ':
+<span class="fc" id="L125">                output.append(&quot;&amp;#x20;&quot;);</span>
+<span class="fc" id="L126">                break;</span>
+            case '/':
+<span class="fc" id="L128">                output.append(&quot;&amp;#x2F;&quot;);</span>
+<span class="fc" id="L129">                break;</span>
+            case '&quot;':
+<span class="fc" id="L131">                output.append(&quot;&amp;quot;&quot;);</span>
+<span class="fc" id="L132">                break;</span>
+            case '&lt;':
+<span class="fc" id="L134">                output.append(&quot;&amp;lt;&quot;);</span>
+<span class="fc" id="L135">                break;</span>
+            case '&gt;':
+<span class="fc" id="L137">                output.append(&quot;&amp;gt;&quot;);</span>
+<span class="fc" id="L138">                break;</span>
+            case '&amp;':
+<span class="fc" id="L140">                output.append(&quot;&amp;amp;&quot;);</span>
+<span class="fc" id="L141">                break;</span>
+            // Unicode new lines
+            case '\u2028':
+<span class="fc" id="L144">                output.append(&quot;&amp;#x2028;&quot;);</span>
+<span class="fc" id="L145">                break;</span>
+            case '\u2029':
+<span class="fc" id="L147">                output.append(&quot;&amp;#x2029;&quot;);</span>
+<span class="fc" id="L148">                break;</span>
+
+            default:
+<span class="fc" id="L151">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L155">        return output.toString();</span>
+    }
+
+
+    /**
+     * Faster HTML entity escaping for tag content or quoted attributes values only.
+     *
+     * HTML entity escaping that is specific to text elements such as the content of
+     * a typical HTML tag (&lt;code&gt;div&lt;/code&gt;, &lt;code&gt;p&lt;/code&gt;, etc.).&lt;br&gt;
+     * This method is not appropriate in all cases, and especially when appending data
+     * in a non-quoted context (e.g., an HTML attribute value that is not surrounded by
+     * single or double quotes). Note that we however, highly discourage the use
+     * of non-quoted attributes.
+     *
+     *
+     *
+     * The following characters are escaped:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * HTML characters: &lt;code&gt;' (U+0022)&lt;/code&gt;, &lt;code&gt;&quot; (U+0027)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;amp; (U+0026)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the HTML escaped string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String htmlText(String input) {
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L187">            return null;</span>
+
+<span class="fc" id="L189">        int length = input.length();</span>
+<span class="fc" id="L190">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L193">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L194" title="All 6 branches covered.">            switch (c) {</span>
+            case '\'':
+<span class="fc" id="L196">                output.append(&quot;&amp;#39;&quot;);</span>
+<span class="fc" id="L197">                break;</span>
+            case '&quot;':
+<span class="fc" id="L199">                output.append(&quot;&amp;quot;&quot;);</span>
+<span class="fc" id="L200">                break;</span>
+            case '&lt;':
+<span class="fc" id="L202">                output.append(&quot;&amp;lt;&quot;);</span>
+<span class="fc" id="L203">                break;</span>
+            case '&gt;':
+<span class="fc" id="L205">                output.append(&quot;&amp;gt;&quot;);</span>
+<span class="fc" id="L206">                break;</span>
+            case '&amp;':
+<span class="fc" id="L208">                output.append(&quot;&amp;amp;&quot;);</span>
+<span class="fc" id="L209">                break;</span>
+            default:
+<span class="fc" id="L211">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L215">        return output.toString();</span>
+    }
+
+
+    /**
+     * URI encoder.
+     *
+     * URI encoding for query string values of the URI:
+     *  &lt;code&gt;/example/?name=URI_ENCODED_VALUE_HERE&lt;/code&gt; &lt;br&gt;
+     * Note that this method is not sufficient to protect for cross-site scripting
+     * in a generic URI context, but only for query string values. If you
+     * need to escape a URI in an &lt;code&gt;href&lt;/code&gt; attribute (for example),
+     * ensure that:
+     * &lt;ul&gt;
+     *   &lt;li&gt;The scheme is allowed (restrict to http, https, or mailto)&lt;/li&gt;
+     *   &lt;li&gt;Use the HTML escaper {@link #html(String)} on the entire URI&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * This URI encoder processes the following characters:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * URI characters: &lt;code&gt;' (U+0022)&lt;/code&gt;, &lt;code&gt;&quot; (U+0027)&lt;/code&gt;,
+     *                 &lt;code&gt;\ (U+005C)&lt;/code&gt;, &lt;code&gt;/ (U+002F)&lt;/code&gt;,
+     *                 &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                 &lt;code&gt;&amp;amp; (U+0026)&lt;/code&gt;,
+     *                 &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                 &lt;code&gt;! (U+0021)&lt;/code&gt;, &lt;code&gt;# (U+0023)&lt;/code&gt;,
+     *                 &lt;code&gt;$ (U+0024)&lt;/code&gt;, &lt;code&gt;% (U+0025)&lt;/code&gt;,
+     *                 &lt;code&gt;( (U+0028)&lt;/code&gt;, &lt;code&gt;) (U+0029)&lt;/code&gt;,
+     *                 &lt;code&gt;* (U+002A)&lt;/code&gt;, &lt;code&gt;+ (U+002B)&lt;/code&gt;,
+     *                 &lt;code&gt;, (U+002C)&lt;/code&gt;, &lt;code&gt;. (U+002E)&lt;/code&gt;,
+     *                 &lt;code&gt;: (U+003A)&lt;/code&gt;, &lt;code&gt;; (U+003B)&lt;/code&gt;,
+     *                 &lt;code&gt;= (U+003D)&lt;/code&gt;, &lt;code&gt;? (U+003F)&lt;/code&gt;,
+     *                 &lt;code&gt;@ (U+0040)&lt;/code&gt;, &lt;code&gt;[ (U+005B)&lt;/code&gt;,
+     *                 &lt;code&gt;] (U+005D)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Control characters: &lt;code&gt;\t (U+0009)&lt;/code&gt;, &lt;code&gt;\n (U+000A)&lt;/code&gt;,
+     *                     &lt;code&gt;\f (U+000C)&lt;/code&gt;, &lt;code&gt;\r (U+000D)&lt;/code&gt;,
+     *                     &lt;code&gt;SPACE (U+0020)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the URI encoded string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String uriParam(String input) {
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L266">            return null;</span>
+
+<span class="fc" id="L268">        int length = input.length();</span>
+<span class="fc" id="L269">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L272">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L273" title="All 29 branches covered.">            switch (c) {</span>
+            // Control chars
+            case '\t':
+<span class="fc" id="L276">                output.append(&quot;%09&quot;);</span>
+<span class="fc" id="L277">                break;</span>
+            case '\n':
+<span class="fc" id="L279">                output.append(&quot;%0A&quot;);</span>
+<span class="fc" id="L280">                break;</span>
+            case '\f':
+<span class="fc" id="L282">                output.append(&quot;%0C&quot;);</span>
+<span class="fc" id="L283">                break;</span>
+            case '\r':
+<span class="fc" id="L285">                output.append(&quot;%0D&quot;);</span>
+<span class="fc" id="L286">                break;</span>
+            // RFC chars to encode, plus % ' &quot; &lt; and &gt;, and space
+            case ' ':
+<span class="fc" id="L289">                output.append(&quot;%20&quot;);</span>
+<span class="fc" id="L290">                break;</span>
+            case '!':
+<span class="fc" id="L292">                output.append(&quot;%21&quot;);</span>
+<span class="fc" id="L293">                break;</span>
+            case '&quot;':
+<span class="fc" id="L295">                output.append(&quot;%22&quot;);</span>
+<span class="fc" id="L296">                break;</span>
+            case '#':
+<span class="fc" id="L298">                output.append(&quot;%23&quot;);</span>
+<span class="fc" id="L299">                break;</span>
+            case '$':
+<span class="fc" id="L301">                output.append(&quot;%24&quot;);</span>
+<span class="fc" id="L302">                break;</span>
+            case '%':
+<span class="fc" id="L304">                output.append(&quot;%25&quot;);</span>
+<span class="fc" id="L305">                break;</span>
+            case '&amp;':
+<span class="fc" id="L307">                output.append(&quot;%26&quot;);</span>
+<span class="fc" id="L308">                break;</span>
+            case '\'':
+<span class="fc" id="L310">                output.append(&quot;%27&quot;);</span>
+<span class="fc" id="L311">                break;</span>
+            case '(':
+<span class="fc" id="L313">                output.append(&quot;%28&quot;);</span>
+<span class="fc" id="L314">                break;</span>
+            case ')':
+<span class="fc" id="L316">                output.append(&quot;%29&quot;);</span>
+<span class="fc" id="L317">                break;</span>
+            case '*':
+<span class="fc" id="L319">                output.append(&quot;%2A&quot;);</span>
+<span class="fc" id="L320">                break;</span>
+            case '+':
+<span class="fc" id="L322">                output.append(&quot;%2B&quot;);</span>
+<span class="fc" id="L323">                break;</span>
+            case ',':
+<span class="fc" id="L325">                output.append(&quot;%2C&quot;);</span>
+<span class="fc" id="L326">                break;</span>
+            case '.':
+<span class="fc" id="L328">                output.append(&quot;%2E&quot;);</span>
+<span class="fc" id="L329">                break;</span>
+            case '/':
+<span class="fc" id="L331">                output.append(&quot;%2F&quot;);</span>
+<span class="fc" id="L332">                break;</span>
+            case ':':
+<span class="fc" id="L334">                output.append(&quot;%3A&quot;);</span>
+<span class="fc" id="L335">                break;</span>
+            case ';':
+<span class="fc" id="L337">                output.append(&quot;%3B&quot;);</span>
+<span class="fc" id="L338">                break;</span>
+            case '&lt;':
+<span class="fc" id="L340">                output.append(&quot;%3C&quot;);</span>
+<span class="fc" id="L341">                break;</span>
+            case '=':
+<span class="fc" id="L343">                output.append(&quot;%3D&quot;);</span>
+<span class="fc" id="L344">                break;</span>
+            case '&gt;':
+<span class="fc" id="L346">                output.append(&quot;%3E&quot;);</span>
+<span class="fc" id="L347">                break;</span>
+            case '?':
+<span class="fc" id="L349">                output.append(&quot;%3F&quot;);</span>
+<span class="fc" id="L350">                break;</span>
+            case '@':
+<span class="fc" id="L352">                output.append(&quot;%40&quot;);</span>
+<span class="fc" id="L353">                break;</span>
+            case '[':
+<span class="fc" id="L355">                output.append(&quot;%5B&quot;);</span>
+<span class="fc" id="L356">                break;</span>
+            case ']':
+<span class="fc" id="L358">                output.append(&quot;%5D&quot;);</span>
+<span class="fc" id="L359">                break;</span>
+
+            default:
+<span class="fc" id="L362">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L366">        return output.toString();</span>
+    }
+
+
+    /**
+     * Same as {@link #uriParam(String)} for now.
+     *
+     * Eventually, this method will evolve into filtering the URI so that
+     * it is safely considered as a URL by a web browser, and does not contain
+     * malicious payloads (data:text/html..., javascript:, etc.).
+     *
+     * @param  input the string to be escaped
+     * @return       the URI encoded string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String uri(String input) {
+<span class="fc" id="L382">        return uriParam(input);</span>
+    }
+
+
+    /**
+     * JavaScript String Unicode escaper.
+     *
+     * JavaScript String Unicode escaping (&lt;code&gt;\UXXXX&lt;/code&gt;) to be used in single or double quoted
+     * JavaScript strings:
+     * &lt;pre&gt;
+     * &amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+     *   window.myString = 'JS_STRING_ESCAPE_HERE';
+     *   window.yourString = &quot;JS_STRING_ESCAPE_HERE&quot;;
+     * &amp;lt;/script&amp;gt;
+     * &lt;/pre&gt;
+     *
+     *
+     * This JavaScript string escaper processes the following characters:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * JS String characters: &lt;code&gt;' (U+0022)&lt;/code&gt;, &lt;code&gt;&quot; (U+0027)&lt;/code&gt;,
+     *                       &lt;code&gt;\ (U+005C)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * URI encoding characters: &lt;code&gt;% (U+0025)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * HTML characters: &lt;code&gt;/ (U+002F)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;amp; (U+0026)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Control characters: &lt;code&gt;\b (U+0008)&lt;/code&gt;, &lt;code&gt;\t (U+0009)&lt;/code&gt;,
+     *                     &lt;code&gt;\n (U+000A)&lt;/code&gt;, &lt;code&gt;0x0b (U+000B)&lt;/code&gt;,
+     *                     &lt;code&gt;\f (U+000C)&lt;/code&gt;, &lt;code&gt;\r (U+000D)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Unicode newlines: &lt;code&gt;LS (U+2028)&lt;/code&gt;, &lt;code&gt;PS (U+2029)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the JavaScript string Unicode escaped string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String jsString(String input) {
+<span class="fc bfc" id="L429" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L430">            return null;</span>
+
+<span class="fc" id="L432">        int length = input.length();</span>
+<span class="fc" id="L433">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L435" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L436">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L437" title="All 17 branches covered.">            switch (c) {</span>
+            // Control chars
+            case '\b':
+<span class="fc" id="L440">                output.append(&quot;\\u0008&quot;);</span>
+<span class="fc" id="L441">                break;</span>
+            case '\t':
+<span class="fc" id="L443">                output.append(&quot;\\u0009&quot;);</span>
+<span class="fc" id="L444">                break;</span>
+            case '\n':
+<span class="fc" id="L446">                output.append(&quot;\\u000A&quot;);</span>
+<span class="fc" id="L447">                break;</span>
+            case '\u000b':
+<span class="fc" id="L449">                output.append(&quot;\\u000B&quot;);</span>
+<span class="fc" id="L450">                break;</span>
+            case '\f':
+<span class="fc" id="L452">                output.append(&quot;\\u000C&quot;);</span>
+<span class="fc" id="L453">                break;</span>
+            case '\r':
+<span class="fc" id="L455">                output.append(&quot;\\u000D&quot;);</span>
+<span class="fc" id="L456">                break;</span>
+            // JavaScript String chars
+            case '\'':
+<span class="fc" id="L459">                output.append(&quot;\\u0027&quot;);</span>
+<span class="fc" id="L460">                break;</span>
+            case '&quot;':
+<span class="fc" id="L462">                output.append(&quot;\\u0022&quot;);</span>
+<span class="fc" id="L463">                break;</span>
+            case '\\':
+<span class="fc" id="L465">                output.append(&quot;\\u005C&quot;);</span>
+<span class="fc" id="L466">                break;</span>
+            // URI encoding char
+            case '%':
+<span class="fc" id="L469">                output.append(&quot;\\u0025&quot;);</span>
+<span class="fc" id="L470">                break;</span>
+            // HTML chars for closing the parent context
+            case '&amp;':
+<span class="fc" id="L473">                output.append(&quot;\\u0026&quot;);</span>
+<span class="fc" id="L474">                break;</span>
+            case '/':
+<span class="fc" id="L476">                output.append(&quot;\\u002F&quot;);</span>
+<span class="fc" id="L477">                break;</span>
+            case '&lt;':
+<span class="fc" id="L479">                output.append(&quot;\\u003C&quot;);</span>
+<span class="fc" id="L480">                break;</span>
+            case '&gt;':
+<span class="fc" id="L482">                output.append(&quot;\\u003E&quot;);</span>
+<span class="fc" id="L483">                break;</span>
+            // Unicode
+            case '\u2028':
+<span class="fc" id="L486">                output.append(&quot;\\u2028&quot;);</span>
+<span class="fc" id="L487">                break;</span>
+            case '\u2029':
+<span class="fc" id="L489">                output.append(&quot;\\u2029&quot;);</span>
+<span class="fc" id="L490">                break;</span>
+
+            default:
+<span class="fc" id="L493">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L497">        return output.toString();</span>
+    }
+
+
+    /**
+     * JavaScript regex content escaper.
+     *
+     * Escape for a JavaScript regular expression:
+     * &lt;pre&gt;
+     * &amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+     *   var b = /^JS_REGEX_ESCAPE_HERE/.test(document.location);
+     * &amp;lt;/script&amp;gt;
+     * &lt;/pre&gt;
+     *
+     *
+     * Note that when using a regular expression inside a JavaScript string such as:
+     * &lt;pre&gt;&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+     *   var b = (new RegExp('^CONTENT_HERE')).test(document.location);
+     * &amp;lt;/script&amp;gt;&lt;/pre&gt;
+     * You should first escape using the {@link #jsRegex(String)} escaper, and make sure
+     * that the JavaScript string itself is properly rendered using the {@link #jsString(String)}
+     * escaper. This is a nested context scenario in which we have a JavaScript regex
+     * inside a JavaScript string, for which we need to first escape the inner most context
+     * and walking back the stack of context to the outer most one.
+     *
+     *
+     * This JavaScript regex escaper processes the following characters:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * Regex characters: &lt;code&gt;\ (U+005C)&lt;/code&gt;, &lt;code&gt;/ (U+002F)&lt;/code&gt;,
+     *                   &lt;code&gt;( (U+0028)&lt;/code&gt;, &lt;code&gt;[ (U+005B)&lt;/code&gt;,
+     *                   &lt;code&gt;{ (U+007B)&lt;/code&gt;, &lt;code&gt;] (U+005D)&lt;/code&gt;,
+     *                   &lt;code&gt;} (U+007D)&lt;/code&gt;, &lt;code&gt;) (U+0029)&lt;/code&gt;,
+     *                   &lt;code&gt;* (U+002A)&lt;/code&gt;, &lt;code&gt;+ (U+002B)&lt;/code&gt;,
+     *                   &lt;code&gt;- (U+002D)&lt;/code&gt;, &lt;code&gt;. (U+002E)&lt;/code&gt;,
+     *                   &lt;code&gt;? (U+003F)&lt;/code&gt;, &lt;code&gt;! (U+0021)&lt;/code&gt;,
+     *                   &lt;code&gt;^ (U+005E)&lt;/code&gt;, &lt;code&gt;$ (U+0024)&lt;/code&gt;,
+     *                   &lt;code&gt;| (U+007C)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Control characters: &lt;code&gt;\t (U+0009)&lt;/code&gt;, &lt;code&gt;\n (U+000A)&lt;/code&gt;,
+     *                     &lt;code&gt;\v (U+000B)&lt;/code&gt;,
+     *                     &lt;code&gt;\f (U+000C)&lt;/code&gt;, &lt;code&gt;\r (U+000D)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Unicode newlines: &lt;code&gt;LS (U+2028)&lt;/code&gt;, &lt;code&gt;PS (U+2029)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the escaped JavaScript regex or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String jsRegex(String input) {
+<span class="fc bfc" id="L553" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L554">            return null;</span>
+
+<span class="fc" id="L556">        int length = input.length();</span>
+<span class="fc" id="L557">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L559" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L560">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L561" title="All 25 branches covered.">            switch (c) {</span>
+            // Control chars
+            case '\t':
+<span class="fc" id="L564">                output.append(&quot;\\t&quot;);</span>
+<span class="fc" id="L565">                break;</span>
+            case '\n':
+<span class="fc" id="L567">                output.append(&quot;\\n&quot;);</span>
+<span class="fc" id="L568">                break;</span>
+            case '\u000b':
+<span class="fc" id="L570">                output.append(&quot;\\v&quot;);</span>
+<span class="fc" id="L571">                break;</span>
+            case '\f':
+<span class="fc" id="L573">                output.append(&quot;\\f&quot;);</span>
+<span class="fc" id="L574">                break;</span>
+            case '\r':
+<span class="fc" id="L576">                output.append(&quot;\\r&quot;);</span>
+<span class="fc" id="L577">                break;</span>
+            // Escape sequence, and regexp terminator
+            case '\\':
+<span class="fc" id="L580">                output.append(&quot;\\\\&quot;);</span>
+<span class="fc" id="L581">                break;</span>
+            case '/':
+<span class="fc" id="L583">                output.append(&quot;\\/&quot;);</span>
+<span class="fc" id="L584">                break;</span>
+            // Regexp specific characters
+            case '(':
+<span class="fc" id="L587">                output.append(&quot;\\(&quot;);</span>
+<span class="fc" id="L588">                break;</span>
+            case '[':
+<span class="fc" id="L590">                output.append(&quot;\\[&quot;);</span>
+<span class="fc" id="L591">                break;</span>
+            case '{':
+<span class="fc" id="L593">                output.append(&quot;\\{&quot;);</span>
+<span class="fc" id="L594">                break;</span>
+            case ']':
+<span class="fc" id="L596">                output.append(&quot;\\]&quot;);</span>
+<span class="fc" id="L597">                break;</span>
+            case ')':
+<span class="fc" id="L599">                output.append(&quot;\\)&quot;);</span>
+<span class="fc" id="L600">                break;</span>
+            case '}':
+<span class="fc" id="L602">                output.append(&quot;\\}&quot;);</span>
+<span class="fc" id="L603">                break;</span>
+            case '*':
+<span class="fc" id="L605">                output.append(&quot;\\*&quot;);</span>
+<span class="fc" id="L606">                break;</span>
+            case '+':
+<span class="fc" id="L608">                output.append(&quot;\\+&quot;);</span>
+<span class="fc" id="L609">                break;</span>
+            case '-':
+<span class="fc" id="L611">                output.append(&quot;\\-&quot;);</span>
+<span class="fc" id="L612">                break;</span>
+            case '.':
+<span class="fc" id="L614">                output.append(&quot;\\.&quot;);</span>
+<span class="fc" id="L615">                break;</span>
+            case '?':
+<span class="fc" id="L617">                output.append(&quot;\\?&quot;);</span>
+<span class="fc" id="L618">                break;</span>
+            case '!':
+<span class="fc" id="L620">                output.append(&quot;\\!&quot;);</span>
+<span class="fc" id="L621">                break;</span>
+            case '^':
+<span class="fc" id="L623">                output.append(&quot;\\^&quot;);</span>
+<span class="fc" id="L624">                break;</span>
+            case '$':
+<span class="fc" id="L626">                output.append(&quot;\\$&quot;);</span>
+<span class="fc" id="L627">                break;</span>
+            case '|':
+<span class="fc" id="L629">                output.append(&quot;\\|&quot;);</span>
+<span class="fc" id="L630">                break;</span>
+            // Unicode
+            case '\u2028':
+<span class="fc" id="L633">                output.append(&quot;\\u2028&quot;);</span>
+<span class="fc" id="L634">                break;</span>
+            case '\u2029':
+<span class="fc" id="L636">                output.append(&quot;\\u2029&quot;);</span>
+<span class="fc" id="L637">                break;</span>
+            default:
+<span class="fc" id="L639">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L643">        return output.toString();</span>
+    }
+
+
+    /**
+     * CSS String escaper.
+     *
+     * CSS escaper for strings such as CSS selector or quoted URI:
+     * &lt;pre&gt;
+     * &amp;lt;style&amp;gt;
+     *  a[href *= &quot;DATA_HERE&quot;] {...}
+     *  li { background: url('DATA_HERE'); }
+     * &amp;lt;/style&amp;gt;
+     * &lt;/pre&gt;
+     *
+     *
+     * This CSS string escaper processes the following characters:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * CSS string characters: &lt;code&gt;' (U+0022)&lt;/code&gt;, &lt;code&gt;&quot; (U+0027)&lt;/code&gt;,
+     *                        &lt;code&gt;\ (U+005C)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * HTML characters: &lt;code&gt;/ (U+002F)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;lt; (U+003C)&lt;/code&gt;, &lt;code&gt;&amp;gt; (U+003E)&lt;/code&gt;,
+     *                  &lt;code&gt;&amp;amp; (U+0026)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Control characters: &lt;code&gt;\b (U+0008)&lt;/code&gt;,
+     *                     &lt;code&gt;\t (U+0009)&lt;/code&gt;, &lt;code&gt;\n (U+000A)&lt;/code&gt;,
+     *                     &lt;code&gt;\f (U+000C)&lt;/code&gt;, &lt;code&gt;\r (U+000D)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;li&gt;
+     * Unicode newlines: &lt;code&gt;LS (U+2028)&lt;/code&gt;, &lt;code&gt;PS (U+2029)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the CSS string escaped or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String cssString(String input) {
+<span class="fc bfc" id="L686" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L687">            return null;</span>
+
+<span class="fc" id="L689">        int length = input.length();</span>
+<span class="fc" id="L690">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L692" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L693">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L694" title="All 15 branches covered.">            switch (c) {</span>
+            // Control chars
+            case '\b':
+<span class="fc" id="L697">                output.append(&quot;\\08 &quot;);</span>
+<span class="fc" id="L698">                break;</span>
+            case '\t':
+<span class="fc" id="L700">                output.append(&quot;\\09 &quot;);</span>
+<span class="fc" id="L701">                break;</span>
+            case '\n':
+<span class="fc" id="L703">                output.append(&quot;\\0A &quot;);</span>
+<span class="fc" id="L704">                break;</span>
+            case '\f':
+<span class="fc" id="L706">                output.append(&quot;\\0C &quot;);</span>
+<span class="fc" id="L707">                break;</span>
+            case '\r':
+<span class="fc" id="L709">                output.append(&quot;\\0D &quot;);</span>
+<span class="fc" id="L710">                break;</span>
+            // String chars
+            case '\'':
+<span class="fc" id="L713">                output.append(&quot;\\27 &quot;);</span>
+<span class="fc" id="L714">                break;</span>
+            case '&quot;':
+<span class="fc" id="L716">                output.append(&quot;\\22 &quot;);</span>
+<span class="fc" id="L717">                break;</span>
+            case '\\':
+<span class="fc" id="L719">                output.append(&quot;\\5C &quot;);</span>
+<span class="fc" id="L720">                break;</span>
+            // HTML chars for closing the parent context
+            case '&amp;':
+<span class="fc" id="L723">                output.append(&quot;\\26 &quot;);</span>
+<span class="fc" id="L724">                break;</span>
+            case '/':
+<span class="fc" id="L726">                output.append(&quot;\\2F &quot;);</span>
+<span class="fc" id="L727">                break;</span>
+            case '&lt;':
+<span class="fc" id="L729">                output.append(&quot;\\3C &quot;);</span>
+<span class="fc" id="L730">                break;</span>
+            case '&gt;':
+<span class="fc" id="L732">                output.append(&quot;\\3E &quot;);</span>
+<span class="fc" id="L733">                break;</span>
+            // Unicode
+            case '\u2028':
+<span class="fc" id="L736">                output.append(&quot;\\002028 &quot;);</span>
+<span class="fc" id="L737">                break;</span>
+            case '\u2029':
+<span class="fc" id="L739">                output.append(&quot;\\002029 &quot;);</span>
+<span class="fc" id="L740">                break;</span>
+
+            default:
+<span class="fc" id="L743">                output.append(c);</span>
+                break;
+            }
+        }
+<span class="fc" id="L747">        return output.toString();</span>
+    }
+
+
+    /**
+     * SQL LIKE clause escaper.
+     *
+     * This SQL LIKE clause escaper does not protect against SQL injection, but ensure
+     * that the string to be consumed in SQL LIKE clause does not alter the current
+     * LIKE query by inserting &lt;code&gt;%&lt;/code&gt; or &lt;code&gt;_&lt;/code&gt;:
+     * &lt;pre&gt;
+     * entityManager.createQuery(&quot;FROM MyEntity e WHERE e.content LIKE :like_query ESCAPE '@'&quot;)
+     *              .setParameter(&quot;like_query&quot;, &quot;%&quot; + Escape.sqlLikeClause(USER_DATA_HERE))
+     *              .getResultList();
+     * &lt;/pre&gt;
+     * This escaper has to be used with a safe SQL query construct such as the JPQL
+     * named parameterized query in the previous example.
+     *
+     *
+     * This escaper uses by default the &lt;code&gt;@&lt;/code&gt; as escape character. The other method
+     * {@link #sqlLikeClause(String,char)} allows for using a different escape character such as
+     * &lt;code&gt;\&lt;/code&gt;.
+     *
+     *
+     * This SQL LIKE escaper processes the following characters:
+     * &lt;ul&gt;
+     * &lt;li&gt;
+     * SQL LIKE characters: &lt;code&gt;_ (U+005F)&lt;/code&gt;, &lt;code&gt;% (U+0025)&lt;/code&gt;,
+     *                      &lt;code&gt;@ (U+0040)&lt;/code&gt;
+     * &lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * @param  input the string to be escaped
+     * @return       the SQL LIKE escaped string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String sqlLikeClause(String input) {
+<span class="fc" id="L785">        return sqlLikeClause(input, '@');</span>
+    }
+
+
+    /**
+     * SQL LIKE clause escaper.
+     *
+     * Similar to {@link #sqlLikeClause(String)}, but allows to specify the escape character
+     * to be used. When a character different than &lt;code&gt;@&lt;/code&gt; is used, &lt;code&gt;@&lt;/code&gt; will
+     * not be escaped by the escaper, and the specified escape character will be.
+     *
+     *
+     * @param  input  the string to be escaped
+     * @param  escape the escape character to be used
+     * @return        the SQL LIKE escaped string or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.0
+     */
+    public static String sqlLikeClause(String input, char escape) {
+<span class="fc bfc" id="L803" title="All 2 branches covered.">        if (input == null)</span>
+<span class="fc" id="L804">            return null;</span>
+
+<span class="fc" id="L806">        int length = input.length();</span>
+<span class="fc" id="L807">        StringBuilder output = allocateStringBuilder(length);</span>
+
+<span class="fc bfc" id="L809" title="All 2 branches covered.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="fc" id="L810">            char c = input.charAt(i);</span>
+<span class="fc bfc" id="L811" title="All 6 branches covered.">            if (c == escape || c == '_' || c == '%') {</span>
+<span class="fc" id="L812">                output.append(escape);</span>
+            }
+<span class="fc" id="L814">            output.append(c);</span>
+        }
+<span class="fc" id="L816">        return output.toString();</span>
+    }
+
+
+    /**
+     * Compute the allocation size of the StringBuilder based on the length.
+     */
+    private static StringBuilder allocateStringBuilder(int length) {
+        // Allocate enough temporary buffer space to avoid reallocation in most
+        // cases. If you believe you will output large amount of data at once
+        // you might need to change the factor.
+<span class="fc" id="L827">        int buflen = length;</span>
+<span class="fc bfc" id="L828" title="All 2 branches covered.">        if (length * 2 &gt; 0)</span>
+<span class="fc" id="L829">            buflen = length * 2;</span>
+<span class="fc" id="L830">        return new StringBuilder(buflen);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

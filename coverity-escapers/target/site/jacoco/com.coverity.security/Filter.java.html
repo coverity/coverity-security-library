@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Filter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">coverity-escapers</a> &gt; <a href="index.source.html" class="el_package">com.coverity.security</a> &gt; <span class="el_source">Filter.java</span></div><h1>Filter.java</h1><pre class="source lang-java linenums">/**
+ *   Copyright (c) 2013-2016 Coverity, Inc.
+ *   All rights reserved.
+ *
+ *   Redistribution and use in source and binary forms, with or without modification,
+ *   are permitted provided that the following conditions are met:
+ *   - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *   - Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or other
+ *   materials provided with the distribution.
+ *   - Neither the name of Coverity, Inc. nor the names of its contributors may be used
+ *   to endorse or promote products derived from this software without specific prior
+ *   written permission from Coverity, Inc.
+ *
+ *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY
+ *   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ *   OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND INFRINGEMENT ARE DISCLAIMED.
+ *   IN NO EVENT SHALL THE COPYRIGHT HOLDER OR  CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ *   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ *   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *   WHETHER IN CONTRACT,  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ *   OF SUCH DAMAGE.
+ */
+package com.coverity.security;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Filter is a small set of methods for filtering tainted data that cannot be escaped. These
+ * methods may change the semantics of the data if it cannot be determined to be safe, however
+ * great care has been taken in the design to ensure that they behave in a way that &quot;makes
+ * sense&quot; intuitively
+ *
+ * These methods fit into the nested escaper framework that the Escape class supports, and
+ * should be used as the innermost &quot;escaper&quot; to ensure correctness, e.g.
+ * &amp;lt;iframe src=&quot;${cov:htmlEscape(cov:asURL(param.web)}&quot;&amp;gt; &amp;lt;/iframe&amp;gt;
+ * Ensure that that param.web cannot escape the src attribute, but also ensures that it cannot
+ * be a URL that causes XSS.
+ *
+ *
+ * While Coverity's static analysis product references these escaping routines
+ * as exemplars and understands their behavior, there is no dependency on
+ * Coverity products and these routines are completely standalone. Feel free to
+ * use them! Just make sure you use them correctly.
+ *
+ *
+ * @author Alex Kouzemtchenko
+ * @author Romain Gaucher
+ */
+<span class="nc" id="L54">public class Filter {</span>
+
+<span class="fc" id="L56">    private static final Pattern OCTAL_REGEX = Pattern.compile(&quot;(0+)([0-7]*)&quot;);</span>
+<span class="fc" id="L57">    private static final Pattern NUMBER_REGEX = Pattern.compile(&quot;[-+]?((\\.[0-9]+)|([0-9]+\\.?[0-9]*))&quot;);</span>
+<span class="fc" id="L58">    private static final Pattern HEX_REGEX = Pattern.compile(&quot;0x[0-9a-fA-F]+&quot;);</span>
+
+    /**
+     * asNumber is useful for outputting dynamic data as a number in a JavaScript
+     * context, e.g.
+     * &amp;lt;script&amp;gt;
+     * var userNum = ${cov:asNumber(param.web)};
+     * &amp;lt;/script&amp;gt;
+     *
+     * It allows decimal and hex numbers (e.g. 0x41) through unmodified, unless they have
+     * leading 0s and may be interpreted as octal numbers, in which case the leading 0s
+     * are stripped.
+     *
+     * @param number    the potential number to filter
+     * @return            a sanitised number or 0 if there is no conversion
+     * @since  1.1
+     */
+    public static String asNumber(String number) {
+<span class="fc" id="L76">        return asNumber(number, &quot;0&quot;);</span>
+    }
+
+    /**
+     * Identical to asNumber, except you can provide your own default value
+     *
+     * @param number        the potential number to filter
+     * @param defaultNumber    a default String to return if the number argument is not a Number
+     * @return                a sanitised number or defaultNumber if there is no conversion
+     * @since  1.1
+     */
+    public static String asNumber(String number, String defaultNumber) {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (number == null)</span>
+<span class="fc" id="L89">            return null;</span>
+<span class="fc" id="L90">        String trimNumber = number.trim();</span>
+
+        //Do not allow octal to keep in line with java parse* functions
+<span class="fc" id="L93">        Matcher octal = OCTAL_REGEX.matcher(trimNumber);</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (octal.matches())</span>
+<span class="fc" id="L95">            return octal.group(2);</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (NUMBER_REGEX.matcher(trimNumber).matches())</span>
+<span class="fc" id="L98">            return trimNumber;</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (HEX_REGEX.matcher(trimNumber).matches())</span>
+<span class="fc" id="L100">            return trimNumber;</span>
+<span class="fc" id="L101">        return defaultNumber;</span>
+    }
+
+<span class="fc" id="L104">    private static final Pattern CSS_HEX_COLOR_REGEX = Pattern.compile(&quot;#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?&quot;);</span>
+<span class="fc" id="L105">    private static final Pattern CSS_NAMED_COLOR_REGEX = Pattern.compile(&quot;[a-zA-Z]{1,20}&quot;);</span>
+
+    /**
+     * asCssColor is useful when you need to insert dynamic data into a CSS color context, e.g.
+     * &amp;lt;style&amp;gt;
+     * .userprofile {
+     * background-color: ${cov:asCssColor(param.web)};
+     * }
+     * &amp;lt;/style&amp;gt;
+     *
+     * It should be used for colors since it is not possible to specify colors inside
+     * CSS strings
+     *
+     * This method validates that the parameter is a valid color, or returns the string &quot;invalid&quot;.
+     * The string invalid was chosen since it is a token that is not valid in this context, so
+     * this rule will be ignored by the CSS parser, but additional rules will still be parsed
+     * properly.
+     *
+     * The effect of this is that it will be as if the CSS rule was never specified.
+     *
+     * We have chosen to provide an illegal token instead of a default such as &quot;transparent&quot;
+     * or &quot;inherit&quot; since the defaults are different for different color contexts, e.g.
+     * background-color defaults to transparent, while color defaults to inherit. This will
+     * essentially preserve those semantics.
+     *
+     *
+     * @param color    the potential css color to filter
+     * @return        the color specified or the string &quot;invalid&quot;
+     * @since  1.1
+     */
+    public static String asCssColor(String color) {
+<span class="fc" id="L136">        return asCssColor(color, &quot;invalid&quot;);</span>
+    }
+
+    /**
+     * Identical to asCssColor, except you can provide your own default value
+     *
+     * @param color           the potential css color to filter
+     * @param defaultColor    a default String to return if the color argument is not a potentially valid CSS color
+     * @return                a sanitised color or defaultColor if there is no conversion
+     * @since  1.1
+     */
+    public static String asCssColor(String color, String defaultColor) {
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (color == null)</span>
+<span class="fc" id="L149">            return null;</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (CSS_HEX_COLOR_REGEX.matcher(color).matches())</span>
+<span class="fc" id="L151">            return color;</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if (CSS_NAMED_COLOR_REGEX.matcher(color).matches())</span>
+<span class="fc" id="L153">            return color;</span>
+
+<span class="fc" id="L155">        return defaultColor;</span>
+    }
+
+<span class="fc" id="L158">    private static final Pattern URL_REGEX = Pattern.compile(&quot;(/|\\\\\\\\|https?:|ftp:|mailto:).*&quot;, Pattern.CASE_INSENSITIVE);</span>
+    /**
+     * URL filtering to ensure that the URL is a safe non-relative URL or transforms it to a safe relative URL.
+     *
+     * Specifically, if the URL starts with one of the following it will be unaltered:
+     * &lt;ul&gt;
+     * &lt;li&gt;/ to allow URLs of the form /path/from/root.jsp&lt;/li&gt;
+     * &lt;li&gt;\\ to allow UNC paths of the form \\server\some\file.xls&lt;/li&gt;
+     * &lt;li&gt;http:&lt;/li&gt;
+     * &lt;li&gt;https:&lt;/li&gt;
+     * &lt;li&gt;ftp:&lt;/li&gt;
+     * &lt;li&gt;mailto:&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     *
+     * Our research shows that these URLs will not cause an XSS defect by being accessed, and is intended to
+     * be used in cases where having a user point a URL at their own content is intended.
+     *
+     * Other URLs are made safe by turning them into URLs relative to the current document, e.g.
+     * file.html becomes ./file.html
+     * ?query becomse ./?query
+     * #hash becomes ./#hash
+     * javascript:alert(1) becomes ./javascript:alert(1)
+     *
+     *
+     * This methods will not prevent XSS if it is used to show active content such as:
+     * &lt;ul&gt;
+     * &lt;li&gt;JavaScript src&lt;/li&gt;
+     * &lt;li&gt;CSS src&lt;/li&gt;
+     * &lt;li&gt;CSS \@import&lt;/li&gt;
+     * &lt;li&gt;Embeded Flash files&lt;/li&gt;
+     * &lt;li&gt;Java Applets&lt;/li&gt;
+     * &lt;li&gt;Embeded PDFs&lt;/li&gt;
+     * &lt;li&gt;Pretty much any other plugin&lt;/li&gt;
+     * &lt;li&gt;etc&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param url    The potentially tainted URL to be Filtered
+     * @return        a safe version of the URL or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.1
+     */
+    public static String asURL(String url) {
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (url == null) {</span>
+<span class="fc" id="L201">            return null;</span>
+        }
+
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (url.length() == 0) {</span>
+<span class="fc" id="L205">            return url;</span>
+        }
+
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if (URL_REGEX.matcher(url).matches()) {</span>
+<span class="fc" id="L209">            return url;</span>
+        }
+
+        //Our fallback is to transform this to a relative URL
+<span class="fc" id="L213">        return &quot;./&quot; + url;</span>
+    }
+
+    /**
+     * This function should be semantically identical to the above function with the exception
+     * of using a scheme blacklist instead of a scheme whitelist.
+     *
+     * It disallows &lt;code&gt;javascript&lt;/code&gt;, &lt;code&gt;vbscript&lt;/code&gt;, &lt;code&gt;data&lt;/code&gt; and &lt;code&gt;about&lt;/code&gt;
+     * URL schemes and turns these URLs into relative URLs the same way the above does.
+     *
+     * It allows all other schemes as long as the scheme name is directly followed by a colon (:)
+     *
+     * The complexity of this function is necessary due to the parsing that browsers do when
+     * they encounter URLs, e.g. stripping new lines and NUL bytes.
+     *
+     * @param url    The potentially tainted URL to be Filtered
+     * @return        a safe version of the URL or &lt;code&gt;null&lt;/code&gt; if &lt;code&gt;input&lt;/code&gt; is null
+     * @since  1.1
+     */
+    public static String asFlexibleURL(String url) {
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        if (url == null) {</span>
+<span class="fc" id="L234">            return null;</span>
+        }
+
+<span class="fc" id="L237">        int i = 0;</span>
+<span class="fc" id="L238">        int length = url.length();</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if (length &lt; 1)</span>
+<span class="fc" id="L240">          return url;</span>
+
+        //Assumption: / is not an escape character in any context
+        //Note: this allows scheme-relative URLs e.g. //google.com/
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (url.startsWith(&quot;/&quot;)) {</span>
+<span class="fc" id="L245">            return url;</span>
+        }
+
+        //Allow UNC paths
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if (url.startsWith(&quot;\\\\&quot;)) {</span>
+<span class="fc" id="L250">            return url;</span>
+        }
+
+        //Find a potential scheme name
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        for (; i &lt; length; i++) {</span>
+<span class="fc" id="L255">            char c = url.charAt(i);</span>
+            //These are valid scheme characters from RFC 3986
+            //Assumption: These are not escape characters in any context
+<span class="fc bfc" id="L258" title="All 18 branches covered.">            if (! (</span>
+                    (c &gt;= 'a' &amp;&amp; c &lt;='z') || (c &gt;= 'A' &amp;&amp; c &lt;='Z') ||
+                    (c &gt;= '0' &amp;&amp; c &lt;='9') || (c == '.') || (c == '+')
+                     || (c == '-')
+                    )) {
+<span class="fc" id="L263">                break;</span>
+            }
+        }
+
+        //i == first non-scheme value
+
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        if (i == length) {</span>
+            //The whole string is consists only of a-z A-Z 0-9 .+-
+<span class="fc" id="L271">            return url;</span>
+        }
+
+<span class="fc bfc" id="L274" title="All 4 branches covered.">        if (url.charAt(i) == ':' &amp;&amp; validateScheme(url.substring(0,i).toLowerCase())) {</span>
+            //We've extracted what we think is a scheme, confirmed it definitely is a scheme
+            //then confirmed the scheme is safe, return the original string
+<span class="fc" id="L277">               return url;</span>
+        }
+
+        //Our fallback is to transform this to a relative URL
+<span class="fc" id="L281">        return &quot;./&quot; + url;</span>
+    }
+
+<span class="fc" id="L284">    private static final Pattern SCHEME_REGEX = Pattern.compile(&quot;(javascript|vbscript|data|about)&quot;);</span>
+
+    private static boolean validateScheme(String scheme) {
+<span class="fc bfc" id="L287" title="All 2 branches covered.">        return !SCHEME_REGEX.matcher(scheme).matches();</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

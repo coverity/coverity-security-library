@@ -1,0 +1,4 @@
+com/coverity/security/EscapeEL.class
+com/coverity/security/Filter.class
+com/coverity/security/Escape.class
+com/coverity/security/FilterEL.class

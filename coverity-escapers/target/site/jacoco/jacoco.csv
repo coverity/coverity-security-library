@@ -1,0 +1,5 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+coverity-escapers,com.coverity.security,Escape,3,748,0,143,1,272,1,129,1,10
+coverity-escapers,com.coverity.security,FilterEL,3,20,0,0,1,6,1,6,1,6
+coverity-escapers,com.coverity.security,EscapeEL,3,21,0,0,1,7,1,7,1,7
+coverity-escapers,com.coverity.security,Filter,3,210,0,56,1,54,1,36,1,8

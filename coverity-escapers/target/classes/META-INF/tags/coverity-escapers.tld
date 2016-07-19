@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+                            http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+    <display-name>Coverity Escapers</display-name>
+
+    <tlib-version>1.1</tlib-version>
+    <jsp-version>2.0</jsp-version>
+
+    <short-name>cov</short-name>
+    <uri>http://coverity.com/security</uri> 
+
+    <function>
+        <name>htmlEscape</name>
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String htmlEscape(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>htmlText</name>
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String htmlText(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>uriEncode</name>  
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String uriEncode(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>uriParamEncode</name>  
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String uriParamEncode(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>jsStringEscape</name>
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String jsStringEscape(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>jsRegexEscape</name>  
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String jsRegexEscape(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>cssStringEscape</name>
+        <function-class>com.coverity.security.EscapeEL</function-class>
+        <function-signature>java.lang.String cssStringEscape(java.lang.String)</function-signature>
+    </function>
+    
+
+    <!-- Filters -->
+    <function>
+        <name>asURL</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asURL(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asFlexibleURL</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asFlexibleURL(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asNumber</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asNumber(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>asNumberDefault</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asNumberDefault(java.lang.String,java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <name>asCssColor</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssColor(java.lang.String)</function-signature>
+    </function>
+    
+    <function>
+        <name>asCssColorDefault</name>
+        <function-class>com.coverity.security.FilterEL</function-class>
+        <function-signature>java.lang.String asCssColorDefault(java.lang.String,java.lang.String)</function-signature>
+    </function>
+
+</taglib>
