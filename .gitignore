@@ -1,6 +1,7 @@
 target
 cov_build
 trunk
+idir
 run-analysis.sh
 README.html
 *.versionsBackup

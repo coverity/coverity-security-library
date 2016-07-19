@@ -1,27 +1,27 @@
 /**
- *   Copyright (c) 2012, Coverity, Inc. 
+ *   Copyright (c) 2012, Coverity, Inc.
  *   All rights reserved.
  *
- *   Redistribution and use in source and binary forms, with or without modification, 
+ *   Redistribution and use in source and binary forms, with or without modification,
  *   are permitted provided that the following conditions are met:
- *   - Redistributions of source code must retain the above copyright notice, this 
+ *   - Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
  *   - Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or other
  *   materials provided with the distribution.
  *   - Neither the name of Coverity, Inc. nor the names of its contributors may be used
- *   to endorse or promote products derived from this software without specific prior 
+ *   to endorse or promote products derived from this software without specific prior
  *   written permission from Coverity, Inc.
- *   
+ *
  *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
  *   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  *   OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND INFRINGEMENT ARE DISCLAIMED.
  *   IN NO EVENT SHALL THE COPYRIGHT HOLDER OR  CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
  *   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- *   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
- *   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- *   WHETHER IN CONTRACT,  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- *   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ *   NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ *   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ *   WHETHER IN CONTRACT,  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  *   OF SUCH DAMAGE.
  */
 package com.coverity.testsuite;
@@ -69,6 +69,10 @@ public class EscapeTest extends TestCase {
         return new TestSuite(EscapeTest.class);
     }
 
+    public void testAllocateZeroLength() {
+      assertTrue(Escape.html("").length() == 0);
+    }
+
     public void testHTMLEscaper_Transtions() {
         // Simple check for full escaped charcters
         for (int i=0; i < HTML_SENSITIVE_CHARS.length; i++) {
@@ -97,6 +101,7 @@ public class EscapeTest extends TestCase {
             assertTrue(!Escape.html(chr).contains(chr));
             assertTrue(!Escape.cssString(chr).contains(chr));
             assertTrue(!Escape.jsString(chr).contains(chr));
+            assertTrue(!Escape.jsRegex(chr).contains(chr));
         }
     }
 
@@ -118,13 +123,13 @@ public class EscapeTest extends TestCase {
                            + EscapeEL.htmlEscape(beforeEscape);
 
         String[] badSequences = {
-            "<", ">", "<script", "</div", 
+            "<", ">", "<script", "</div",
             "\\", "'", " ", "& "
         };
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -143,13 +148,13 @@ public class EscapeTest extends TestCase {
                            + EscapeEL.htmlText(beforeEscape);
 
         String[] badSequences = {
-            "<", ">", "<script", "</div", 
+            "<", ">", "<script", "</div",
             "'", "\"", "& "
         };
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -159,7 +164,7 @@ public class EscapeTest extends TestCase {
         String beforeEscape = "close context'\" break context "
                             + "& + : % </script>"
                             + "\t \n \f \r (!#foobar$) *.*=?[@]";
-        String afterEscape = Escape.uri(beforeEscape) 
+        String afterEscape = Escape.uri(beforeEscape)
                            + EscapeEL.uriEncode(beforeEscape)
                            + EscapeEL.uriParamEncode(beforeEscape);
 
@@ -173,7 +178,7 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -198,7 +203,7 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -214,7 +219,7 @@ public class EscapeTest extends TestCase {
                            + EscapeEL.jsRegexEscape(beforeEscape);
 
         String[] badSequences = {
-            "\t", "\n", "\u000b", "\f", "\r",
+            "\t", "\n", "\u000b", "\f", "\r", "\u2029", "\u2028",
             "</script>", " \\ ", " / ",
             " ( ", " ) ", " [ ", " ] ", " { ", " } ", " * ",
             " . ", " + ", " - ", " ? ", " ! ", " ^ ", " $ ",
@@ -223,7 +228,7 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence)); 
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -246,7 +251,7 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
+            assertTrue(!afterEscape.contains(badSequence));
         }
     }
 
@@ -268,8 +273,8 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
-        }     
+            assertTrue(!afterEscape.contains(badSequence));
+        }
     }
 
     public void testNestedURLInCSSInHTMLEscaper_String() {
@@ -291,14 +296,14 @@ public class EscapeTest extends TestCase {
 
         for (int i=0; i < badSequences.length; i++) {
             String badSequence = badSequences[i];
-            assertTrue(!afterEscape.contains(badSequence));         
-        }     
+            assertTrue(!afterEscape.contains(badSequence));
+        }
 
     }
 
     public void testForNullInput() {
-        // The test for null inputs is useful to make sure that we do not throw an 
-        // exception when receiving an null EL variable (quite common scenario) 
+        // The test for null inputs is useful to make sure that we do not throw an
+        // exception when receiving an null EL variable (quite common scenario)
         try {
             Escape.html(null);
             Escape.htmlText(null);
