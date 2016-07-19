@@ -1,5 +1,5 @@
 /**
- *   Copyright (c) 2013, Coverity, Inc.
+ *   Copyright (c) 2013-2016 Coverity, Inc.
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without modification,

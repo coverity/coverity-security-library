@@ -333,7 +333,6 @@ public class FilterTest extends TestCase {
         for (int i=0; i < incorrectSchemeSequences.length; i++) {
             String incorrectScheme = incorrectSchemeSequences[i];
             String afterFilter = Filter.asFlexibleURL(incorrectScheme);
-            System.out.println(incorrectScheme + " -> " + afterFilter);
 
             assertTrue(!afterFilter.equals(incorrectScheme));
         }
